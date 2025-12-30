@@ -51,7 +51,7 @@ obs_rel_grps3$detID_defin[obs_rel_grps3$obssite=="LGRRRR"]=0 # an index with zer
 
 # Only including the definitive detection and detections that occured afterwards
 obs_rel_grps4 <- obs_rel_grps3 %>% 
-  filter(defin_det_yr %in% 1998:2023 & detID_defin>=0) %>%
+  filter(defin_det_yr %in% 1998:2025 & detID_defin>=0) %>%
   group_by(code)
 
 foc_obssites <- c("LGRRRR","B2J","BCC","ESX","GRJ","GRS","MCJ","PD5","PD6","PD7","PD8","TWX")
@@ -148,6 +148,9 @@ table( off_used$grp_code %in% obs_rel_grps7$grp_code)
 
 off_used <- off_used[off_used$grp_code %in% obs_rel_grps7$grp_code,]
 
+source("R/make_bin_tab.R")
+
+
 ii=1
 test <- make_bin_tab(strt=off_used$off_strt[ii],
                      end=off_used$off_end[ii],
@@ -155,12 +158,15 @@ test <- make_bin_tab(strt=off_used$off_strt[ii],
                      row_data=off_used[ii,c(1:5)])
 test
 
+
+off_used[112,]
+
 bt=proc.time()
 sub_ls=out_ls=list()
 bin_tab_ls_comb=list()
 running_id_val <- 0
-# for( ii in 1:nrow(off_used)){
-for( ii in 395:nrow(off_used)){
+for( ii in 1:nrow(off_used)){
+# for( ii in 425:nrow(off_used)){
   if(ii %in% seq(1,nrow(off_used),20)){message(paste(ii,"of",nrow(off_used)))}
   bin_list_ls=list()
   
@@ -191,7 +197,7 @@ for( ii in 395:nrow(off_used)){
   # mx_test=cbind(cat_mat,apply(cat_mat,2,function(x){x==max(x)}))
   
   # speccial case when cat_mat had only 1 row
-  if(ii==394){
+  if(ii %in% c(112,280,424)){
     
     tmp_df <- data.frame(matrix(cat_mat,nrow=1))
     colnames(tmp_df)=names(cat_mat)
@@ -203,8 +209,8 @@ for( ii in 395:nrow(off_used)){
                                cat_mat)
   }
   
-  out_ls[[ii]] <- data.frame(sub_ls[[ii]],"strt_time"=off_used$off_strt[ii],"end_time"=off_used$off_end[ii],
-                             cat_mat)
+  # out_ls[[ii]] <- data.frame(sub_ls[[ii]],"strt_time"=off_used$off_strt[ii],"end_time"=off_used$off_end[ii],
+  #                            cat_mat)
   
 }
 proc.time()-bt # takes ~ 30 seconds
@@ -216,10 +222,10 @@ obs_rel_grps8 <- do.call(rbind,out_ls) #%>% left_join(bin_tab_ls_combDF %>% sele
 proc.time()-bt # takes ~ 6.5 min
 
 # obs_rel_grps9$grp_code
-bin_tab_ls_combDF
+# bin_tab_ls_combDF
 
 
-nrow(obs_rel_grps7)
+nrow(obs_rel_grps7) #no difference
 nrow(obs_rel_grps8)
 
 
@@ -242,7 +248,8 @@ obs_rel_grps9 <- obs_rel_grps9[!duplicated(obs_rel_grps9$code2),]
 nrow(obs_rel_grps9)
 
 
-3920377-3920251 #126 duplicates
+
+# 3920377-3920251 #126 duplicates
 
 # obs_rel_grps9 <- obs_rel_grps6[!duplicated(obs_rel_grps6$code2),]
 
@@ -344,16 +351,16 @@ bin_tab_ls_combDFwYR$unq_binID <- 1:nrow(bin_tab_ls_combDFwYR)
 mcn_dh_tab2
 
 
-saveRDS(obs_rel_grps9,"temp/data_9823_comp_SI_test/obs_rel_grps9_9823_wPD568.rds")
-saveRDS(obs_rel_grps8,"temp/data_9823_comp_SI_test/obs_rel_grps8_9823_wPD568.rds")
+saveRDS(obs_rel_grps9,"comp_files/obs_rel_grps9_9823_wPD568.rds")
+saveRDS(obs_rel_grps8,"comp_files/obs_rel_grps8_9823_wPD568.rds")
 
 
 
-saveRDS(lgr_dh_tab2,"temp/data_9823_comp_SI_test/lgr_dh_tab2_9823_wPD568.rds")
-saveRDS(mcn_dh_tab2,"temp/data_9823_comp_SI_test/mcn_dh_tab2_9823_wPD568.rds")
+saveRDS(lgr_dh_tab2,"comp_files/lgr_dh_tab2_9823_wPD568.rds")
+saveRDS(mcn_dh_tab2,"comp_files/mcn_dh_tab2_9823_wPD568.rds")
 # saveRDS(DF,"temp/diff_time_frst_to_99p_9823_wPD568.rds")
 # saveRDS(bin_tab_ls_combDF,"temp/bin_tab_ls_combDF.rds")
 
-saveRDS(bin_tab_ls_combDFwYR,"temp/data_9823_comp_SI_test/bin_tab_ls_combDFwYR_wPD568.rds")
+saveRDS(bin_tab_ls_combDFwYR,"comp_files/bin_tab_ls_combDFwYR_wPD568.rds")
 
 
