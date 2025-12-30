@@ -349,9 +349,18 @@ ggplot(data=p_contrib_tabDF %>% filter(dat_grp=="lgr_det"),aes(y=p_contrib,x=def
 
 
 
-ggplot(data=p_contrib_tabDF %>% filter(dat_grp=="mcn_det"),aes(y=p_contrib,x=defin_det_yr ,color=Rear_Type,linetype=Rear_Type)) + 
-  geom_line(stat="identity") + facet_grid(esutype~bin) + mytheme + 
-  geom_hline(yintercept = 0.8) + labs(y=my_exp_contrib,x="Year") + ggtitle( expression(S[MCN-BON]) )
+
+
+
+
+head(p_contrib_tabDF)
+
+p_contrib_tabDF$abv_80thresh =p_contrib_tabDF$p_contrib>0.8
+
+p_contrib_tabDF %>% group_by(dat_grp,esutype,reartype,bin) %>% 
+  summarize(n_yrs=length(abv_80thresh),
+            sum(abv_80thresh)/n_yrs)
+
 
 
 # my_exp <- expression(S[MCN-BON])
