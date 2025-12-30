@@ -94,6 +94,9 @@ lgr_est_outDF2 <- lgr_est_outDF %>%
 lgr_est_outDF2 %>% filter(RT_COMB)
 
 
+saveRDS(lgr_est_outDF2,"est_files/lgr_est_outDF2.rds")
+saveRDS(mcn_est_outDF2,"est_files/mcn_est_outDF2.rds")
+
 
 ######################################## #
 # 
@@ -114,69 +117,47 @@ lgr_est_outDF3 <- lgr_est_outDF2 %>%
 # saveRDS(lgr_est_outDF3,"temp/lgr_est_outDF3.rds")
 
 
-table(lgr_est_outDF3$dat_grp)
-lgr_est_outDF3$defin_det_yr
+source("R/get_ests_from_MSS.R")
 
-tail(lgr_est_outDF3)
+
+lgr_est_outDF4 <- data.frame(lgr_est_outDF3,t(sapply(1:nrow(lgr_est_outDF3),function(x) per2_surph_ests(cell_vals_in = unlist(lgr_est_outDF3[x,c("n.11","n.10","n.01","n.00")]),w_table=F))))
+mcn_est_outDF4 <- data.frame(mcn_est_outDF3,t(sapply(1:nrow(mcn_est_outDF3),function(x) per2_surph_ests(cell_vals_in = unlist(mcn_est_outDF3[x,c("n.11","n.10","n.01","n.00")]),w_table=F))))
 
 
 # MCN_BON reach
 MCN_BON_per_2_mods_outDF_sep <- bind_rows(
   # MCN to BON separate rear types
-  data.frame(grp="MCN_BON_wMCNtags",mcn_est_outDF3 %>%  filter(!RT_COMB)),
+  data.frame(grp="MCN_BON_wMCNtags",mcn_est_outDF4 %>%  filter(!RT_COMB)),
   # LGR fish MCN-BON  2-period model
-  data.frame(grp="MCN_BON_wLGRtags",lgr_est_outDF3) %>%  filter(!RT_COMB))
-
-#MCN_BON_per_2_mods_outDF_sep
-# 
-# add_p1SE <- function(subb){
-#     subb$R1=subb$N
-#     subb$R2=0
-#     subb$m12=subb$n.10+subb$n.11
-#     subb$m13=subb$n.01
-#     subb$m2=subb$m12
-#     subb$m3=subb$m13
-#     subb$T2=subb$m2+subb$m3
-#     subb$T3=subb$m3
-#     subb$z2=subb$m3
-#     subb$r1=subb$n.10 +subb$n.11
-#     
-#     stopifnot(all(subb$T2==subb$z2+subb$m2))
-# 
-#     subb$r2=0
-#     stopifnot(all(subb$T3==subb$z2+subb$r2))
-#     
-#     subb$p1SE=subb$p1*(1-subb$p1)^2 + ((1/subb$r1)-(1/subb$R1) + (1/subb$m2) + (1/subb$z2))
-#     return(subb)
-#   }
+  data.frame(grp="MCN_BON_wLGRtags",lgr_est_outDF4) %>%  filter(!RT_COMB))
 
 
 saveRDS(mcn_est_outDF3,"est_files/mcn_est_outDF3.rds")
 
-
-bt=proc.time()
-MCN_BON_surph_est_mat <- sapply(1:nrow(MCN_BON_per_2_mods_outDF_sep),
-                            function(ii){
-                              if(ii %in% seq(1,nrow(MCN_BON_per_2_mods_outDF_sep),500)){print(ii)}
-                              per2_surph_ests_MOD(MCN_BON_per_2_mods_outDF_sep[ii,c("n.11","n.10","n.01","n.00")]) }
-)
-proc.time()-bt
+# bt=proc.time()
+# MCN_BON_surph_est_mat <- sapply(1:nrow(MCN_BON_per_2_mods_outDF_sep),
+#                             function(ii){
+#                               if(ii %in% seq(1,nrow(MCN_BON_per_2_mods_outDF_sep),500)){print(ii)}
+#                               per2_surph_ests_MOD(MCN_BON_per_2_mods_outDF_sep[ii,c("n.11","n.10","n.01","n.00")]) })
+# proc.time()-bt
 
 
-MCN_BON_per_2_mods_outDF_sep_wp1se <- cbind(MCN_BON_per_2_mods_outDF_sep,t(MCN_BON_surph_est_mat))
+# MCN_BON_per_2_mods_outDF_sep_wp1se <- cbind(MCN_BON_per_2_mods_outDF_sep,t(MCN_BON_surph_est_mat))
+# dim(MCN_BON_per_2_mods_outDF_sep)
+# dim(MCN_BON_surph_est_mat)
+# head(MCN_BON_per_2_mods_outDF_sep_wp1se)
 
-dim(MCN_BON_per_2_mods_outDF_sep)
-dim(MCN_BON_surph_est_mat)
+saveRDS(MCN_BON_per_2_mods_outDF_sep,"est_files/MCN_BON_per_2_mods_outDF_sep.rds")
 
-head(MCN_BON_per_2_mods_outDF_sep_wp1se)
-
-saveRDS(MCN_BON_per_2_mods_outDF_sep_wp1se,"est_files/MCN_BON_per_2_mods_outDF_sep.rds")
-
-
-
-
-
-
+# saveRDS(MCN_BON_per_2_mods_outDF_sep_wp1se,"est_files/MCN_BON_per_2_mods_outDF_sep.rds")
+# 
+# str(data.frame(comb_df))
+# head(comb_df)
+# str(comb_df)
+# 
+# str(comb_df,which(names(comb_df)=="S1"):ncol(comb_df))
+# 
+# 
 # 
 # bt=proc.time()
 # MCN_surph_est_mat <- sapply(1:nrow(MCN_BON_per_2_mods_outDF_sep),
