@@ -114,7 +114,8 @@ lgr_est_outDF3 <- lgr_est_outDF2 %>%
   left_join(lgr_RT_rep_tab) %>%
   mutate(RT_rep=ifelse(reartype!="comb",reartype,RT_rep))
 
-# saveRDS(lgr_est_outDF3,"temp/lgr_est_outDF3.rds")
+saveRDS(lgr_est_outDF3,"temp/lgr_est_outDF3.rds")
+saveRDS(mcn_est_outDF3,"est_files/mcn_est_outDF3.rds")
 
 
 source("R/get_ests_from_MSS.R")
@@ -132,7 +133,6 @@ MCN_BON_per_2_mods_outDF_sep <- bind_rows(
   data.frame(grp="MCN_BON_wLGRtags",lgr_est_outDF4) %>%  filter(!RT_COMB))
 
 
-saveRDS(mcn_est_outDF3,"est_files/mcn_est_outDF3.rds")
 
 # bt=proc.time()
 # MCN_BON_surph_est_mat <- sapply(1:nrow(MCN_BON_per_2_mods_outDF_sep),
