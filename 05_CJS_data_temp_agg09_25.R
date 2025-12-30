@@ -10,6 +10,7 @@ mcn_dh_tab2$DH_red <- factor(paste(mcn_dh_tab2$BON,mcn_dh_tab2$Estuary),
 
 bin_tab_ls_combDFwYR <- readRDS("comp_files/bin_tab_ls_combDFwYR_9825_wPD568.rds")
 
+source("R/get_CJS_count_ls.R")
 
 source("R/CJS_aggre_fxns.R")
 source("R/CJS_aggre_est_2per.R")
@@ -28,13 +29,13 @@ mcn_dh_tab2[is.na(mcn_dh_tab2$day),]
 MCN_cjs_dataset_ls$dat_ls_RTsep$day_grp_tab[43,]
 MCN_cjs_dataset_ls$dat_ls_RTsep$day_grp_tab[MCN_cjs_dataset_ls$dat_ls_RTsep$day_grp_tab$grp_code=="mcn_det SR_Ch1 H 2009",]
 
-all_out <- CJS_aggre_est_2per(dat_in=mcn_dh_tab2,DH_cols="DH_red")
+MCN_all_out <- CJS_aggre_est_2per(dat_in=mcn_dh_tab2,DH_cols="DH_red")
 
 
 # all_out$summ_tab1
 # all_out$summ_tab2
 
-mcn_est_outDF <- all_out$outDF
+mcn_est_outDF <- MCN_all_out$outDF
 head(mcn_est_outDF)
 table(is.na(mcn_est_outDF$binID))
 
@@ -60,7 +61,7 @@ dir.create("est_files")
 saveRDS(mcn_est_outDF3,"est_files/mcn_est_outDF3.rds")
 
 
-# head(all_out$out_ls_RTcomb)
+
 table(mcn_est_outDF$reartype)
 
 
@@ -80,8 +81,8 @@ lapply(LGR_cjs_dataset_ls$dat_ls_RTsep,dim)
 lapply(LGR_cjs_dataset_ls$dat_ls_RTcomb,dim)
 
 
-all_out <- CJS_aggre_est_2per(dat_in=lgr_dh_tab2,DH_cols="DH_red")
-lgr_est_outDF <- all_out$outDF
+LGR_all_out <- CJS_aggre_est_2per(dat_in=lgr_dh_tab2,DH_cols="DH_red")
+lgr_est_outDF <- LGR_all_out$outDF
 head(lgr_est_outDF)
 
 lgr_est_outDF2 <- lgr_est_outDF %>%
@@ -112,6 +113,10 @@ lgr_est_outDF3 <- lgr_est_outDF2 %>%
 
 # saveRDS(lgr_est_outDF3,"temp/lgr_est_outDF3.rds")
 
+
+table(lgr_est_outDF3$dat_grp)
+lgr_est_outDF3$defin_det_yr
+
 tail(lgr_est_outDF3)
 
 
@@ -122,8 +127,8 @@ MCN_BON_per_2_mods_outDF_sep <- bind_rows(
   # LGR fish MCN-BON  2-period model
   data.frame(grp="MCN_BON_wLGRtags",lgr_est_outDF3) %>%  filter(!RT_COMB))
 
-MCN_BON_per_2_mods_outDF_sep
-
+#MCN_BON_per_2_mods_outDF_sep
+# 
 # add_p1SE <- function(subb){
 #     subb$R1=subb$N
 #     subb$R2=0
@@ -147,83 +152,110 @@ MCN_BON_per_2_mods_outDF_sep
 
 
 saveRDS(mcn_est_outDF3,"est_files/mcn_est_outDF3.rds")
-saveRDS(lgr_est_outDF3,"est_files/lgr_est_outDF3.rds")
-
-
 
 
 bt=proc.time()
-surph_est_mat <- sapply(1:nrow(MCN_BON_per_2_mods_outDF_sep),
-       function(ii){
-         if(ii %in% seq(1,nrow(MCN_BON_per_2_mods_outDF_sep),500)){print(ii)}
-         per2_surph_ests_MOD(MCN_BON_per_2_mods_outDF_sep[ii,c("n.11","n.10","n.01","n.00")]) }
-       )
+MCN_BON_surph_est_mat <- sapply(1:nrow(MCN_BON_per_2_mods_outDF_sep),
+                            function(ii){
+                              if(ii %in% seq(1,nrow(MCN_BON_per_2_mods_outDF_sep),500)){print(ii)}
+                              per2_surph_ests_MOD(MCN_BON_per_2_mods_outDF_sep[ii,c("n.11","n.10","n.01","n.00")]) }
+)
 proc.time()-bt
 
+
+MCN_BON_per_2_mods_outDF_sep_wp1se <- cbind(MCN_BON_per_2_mods_outDF_sep,t(MCN_BON_surph_est_mat))
+
 dim(MCN_BON_per_2_mods_outDF_sep)
-dim(surph_est_mat)
-
-
- <- cbind(MCN_BON_per_2_mods_outDF_sep,surph_est_mat)
-
-
-
-
-# surph_est_mat <- do.call(cbind,per2_surph_ests_MOD(cell_vals_in = tmp_mat))
-
-MCN_BON_per_2_mods_outDF_sep_wp1se <- cbind(MCN_BON_per_2_mods_outDF_sep,surph_est_mat)
+dim(MCN_BON_surph_est_mat)
 
 head(MCN_BON_per_2_mods_outDF_sep_wp1se)
 
-MCN_BON_per_2_mods_outDF_sep_wp1se <- add_p1SE(MCN_BON_per_2_mods_outDF_sep)
-
-# source("R/add_p1SE.R")
-MCN_BON_per_2_mods_outDF_sep_wp1se <- add_p1SE(MCN_BON_per_2_mods_outDF_sep)
-# MCN_BON_per_2_mods_outDF_sep_wp1se <- get_ests_from_MSS(MCN_BON_per_2_mods_outDF_sep)
-# head(MCN_BON_per_2_mods_outDF_sep)
+saveRDS(MCN_BON_per_2_mods_outDF_sep_wp1se,"est_files/MCN_BON_per_2_mods_outDF_sep.rds")
 
 
 
 
 
-surph_est_mat <- per2_surph_ests_MOD(cell_vals_in = tmp_mat)
-
-
-MCN_BON_per_2_mods_outDF_sep_wp1se <- cbind(MCN_BON_per_2_mods_outDF_sep,surph_est_mat)
-
-# get_ests_from_MSS <- function(cell_vals_in,type="Skalski 1998"){
-  
-
-tmp_mat <- MCN_BON_per_2_mods_outDF_sep[1:3,c("n.11","n.10","n.01","n.00")]
-(surph_est_cols <- per2_surph_ests_MOD(cell_vals_in = tmp_mat))
-
-
-
-
-tmp_mat <- MCN_BON_per_2_mods_outDF_sep[1,c("n.11","n.10","n.01","n.00")]
-
-aa=get_ests_from_MSS(cell_vals_in = tmp_mat)
-
-get_ests_from_MSS(cell_vals_in = tmp_mat)
-
-
-# get_ests_from_MSS
-# 40185
-
-tmp_mat <- MCN_BON_per_2_mods_outDF_sep[5000:5000,c("n.11","n.10","n.01","n.00")]
-(surph_est_cols <- per2_surph_ests(cell_vals_in = tmp_mat,w_table=F))
-
-
-tmp_mat <- MCN_BON_per_2_mods_outDF_sep[1:300,c("n.11","n.10","n.01","n.00")]
-(surph_est_cols <- per2_surph_ests(cell_vals_in = tmp_mat))
-
-
-
-per2_surph_ests
-
-# cell_col_ind <- which(names(MCN_BON_per_2_mods_outDF_sep) %in% c("n.11","n.10","n.01","n.00"))
-surph_est_cols <- per2_surph_ests(cell_vals_in = MCN_BON_per_2_mods_outDF_sep[,cell_col_ind])
 
 # 
-# saveRDS(MCN_BON_per_2_mods_outDF_sep_wp1se,"temp/data_9823_comp_SI_test/MCN_BON_per_2_mods_outDF_sep.rds")
+# bt=proc.time()
+# MCN_surph_est_mat <- sapply(1:nrow(MCN_BON_per_2_mods_outDF_sep),
+#                             function(ii){
+#                               if(ii %in% seq(1,nrow(MCN_BON_per_2_mods_outDF_sep),500)){print(ii)}
+#                               per2_surph_ests_MOD(MCN_BON_per_2_mods_outDF_sep[ii,c("n.11","n.10","n.01","n.00")]) }
+# )
+# proc.time()-bt
+# 
+# 
+# MCN_BON_per_2_mods_outDF_sep_wp1se <- cbind(MCN_BON_per_2_mods_outDF_sep,surph_est_mat)
+# 
+# dim(MCN_BON_per_2_mods_outDF_sep)
+# dim(surph_est_mat)
+# 
+# #saveRDS(lgr_est_outDF3,"est_files/lgr_est_outDF3.rds")
+# 
+# 
+# 
+# # <- cbind(MCN_BON_per_2_mods_outDF_sep,surph_est_mat)
+# 
+# 
+# 
+# 
+# # surph_est_mat <- do.call(cbind,per2_surph_ests_MOD(cell_vals_in = tmp_mat))
+# 
+# MCN_BON_per_2_mods_outDF_sep_wp1se <- cbind(MCN_BON_per_2_mods_outDF_sep,surph_est_mat)
+# 
+# head(MCN_BON_per_2_mods_outDF_sep_wp1se)
+# 
+# MCN_BON_per_2_mods_outDF_sep_wp1se <- add_p1SE(MCN_BON_per_2_mods_outDF_sep)
+# 
+# # source("R/add_p1SE.R")
+# MCN_BON_per_2_mods_outDF_sep_wp1se <- add_p1SE(MCN_BON_per_2_mods_outDF_sep)
+# # MCN_BON_per_2_mods_outDF_sep_wp1se <- get_ests_from_MSS(MCN_BON_per_2_mods_outDF_sep)
+# # head(MCN_BON_per_2_mods_outDF_sep)
+# 
+# 
+# 
+# 
+# 
+# surph_est_mat <- per2_surph_ests_MOD(cell_vals_in = tmp_mat)
+# 
+# 
+# MCN_BON_per_2_mods_outDF_sep_wp1se <- cbind(MCN_BON_per_2_mods_outDF_sep,surph_est_mat)
+# 
+# # get_ests_from_MSS <- function(cell_vals_in,type="Skalski 1998"){
+# 
+# 
+# tmp_mat <- MCN_BON_per_2_mods_outDF_sep[1:3,c("n.11","n.10","n.01","n.00")]
+# (surph_est_cols <- per2_surph_ests_MOD(cell_vals_in = tmp_mat))
+# 
+# 
+# 
+# 
+# tmp_mat <- MCN_BON_per_2_mods_outDF_sep[1,c("n.11","n.10","n.01","n.00")]
+# 
+# aa=get_ests_from_MSS(cell_vals_in = tmp_mat)
+# 
+# get_ests_from_MSS(cell_vals_in = tmp_mat)
+# 
+# 
+# # get_ests_from_MSS
+# # 40185
+# 
+# tmp_mat <- MCN_BON_per_2_mods_outDF_sep[5000:5000,c("n.11","n.10","n.01","n.00")]
+# (surph_est_cols <- per2_surph_ests(cell_vals_in = tmp_mat,w_table=F))
+# 
+# 
+# tmp_mat <- MCN_BON_per_2_mods_outDF_sep[1:300,c("n.11","n.10","n.01","n.00")]
+# (surph_est_cols <- per2_surph_ests(cell_vals_in = tmp_mat))
+# 
+# 
+# 
+# per2_surph_ests
+# 
+# # cell_col_ind <- which(names(MCN_BON_per_2_mods_outDF_sep) %in% c("n.11","n.10","n.01","n.00"))
+# surph_est_cols <- per2_surph_ests(cell_vals_in = MCN_BON_per_2_mods_outDF_sep[,cell_col_ind])
+# 
+# # 
+# # saveRDS(MCN_BON_per_2_mods_outDF_sep_wp1se,"temp/data_9823_comp_SI_test/MCN_BON_per_2_mods_outDF_sep.rds")
 
