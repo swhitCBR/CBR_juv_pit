@@ -283,15 +283,16 @@ head(dh_tab)
 table(dh_tab$DH_label) 
 
 # pre-loaded tables describing detection histories for 2 locations
-LGR_DH_matchDF
-MCN_DH_matchDF
+# head(LGR_DH_matchDF)
+# head(MCN_DH_matchDF)
 
+source("R/LGR_DH_match & MCN_DH_match.R")
 
 
 bt=proc.time()
-
 lgr_dh_tab <- dh_tab %>% filter(dat_grp %in% c("lgr_det","lgr_pooled")) %>% left_join(LGR_DH_matchDF)
 mcn_dh_tab <- dh_tab %>% filter(dat_grp=="mcn_det") %>% left_join(MCN_DH_matchDF)
+proc.time()-bt # takes ~ 6.5 mins
 
 
 ################################################### #
@@ -308,7 +309,7 @@ table(is.na(mtc2))
 
 
 head(obs_rel_grps8)
-
+bt=proc.time()
 
 lgr_dh_tab2 <- data.frame(lgr_dh_tab[!is.na(mtc1),],obs_rel_grps8[mtc1[!is.na(mtc1)],c("relsite","day","days3.5","week1","weeks2","month")])
 mcn_dh_tab2 <- data.frame(mcn_dh_tab[!is.na(mtc2),],obs_rel_grps8[mtc2[!is.na(mtc2)],c("relsite","day","days3.5","week1","weeks2","month")])
@@ -318,8 +319,8 @@ mcn_dh_tab2$virt_det <- mcn_dh_tab2$relsite=="LGRRRR"
 
 proc.time()-bt # takes ~ 6.5 mins
 
-lgr_dh_tab2
-mcn_dh_tab2
+# lgr_dh_tab2
+# mcn_dh_tab2
 gc()
 
 nrow(bin_tab_ls_combDF)
@@ -351,16 +352,16 @@ bin_tab_ls_combDFwYR$unq_binID <- 1:nrow(bin_tab_ls_combDFwYR)
 mcn_dh_tab2
 
 
-saveRDS(obs_rel_grps9,"comp_files/obs_rel_grps9_9823_wPD568.rds")
-saveRDS(obs_rel_grps8,"comp_files/obs_rel_grps8_9823_wPD568.rds")
+saveRDS(obs_rel_grps9,"comp_files/obs_rel_grps9_9825_wPD568.rds")
+saveRDS(obs_rel_grps8,"comp_files/obs_rel_grps8_9825_wPD568.rds")
 
 
 
-saveRDS(lgr_dh_tab2,"comp_files/lgr_dh_tab2_9823_wPD568.rds")
-saveRDS(mcn_dh_tab2,"comp_files/mcn_dh_tab2_9823_wPD568.rds")
+saveRDS(lgr_dh_tab2,"comp_files/lgr_dh_tab2_9825_wPD568.rds")
+saveRDS(mcn_dh_tab2,"comp_files/mcn_dh_tab2_9825_wPD568.rds")
 # saveRDS(DF,"temp/diff_time_frst_to_99p_9823_wPD568.rds")
 # saveRDS(bin_tab_ls_combDF,"temp/bin_tab_ls_combDF.rds")
 
-saveRDS(bin_tab_ls_combDFwYR,"comp_files/bin_tab_ls_combDFwYR_wPD568.rds")
+saveRDS(bin_tab_ls_combDFwYR,"comp_files/bin_tab_ls_combDFwYR_9825_wPD568.rds")
 
-
+# save.image("comp_files/04a_comp_env_20gb.Rdata")
