@@ -6,3 +6,6 @@
 temp/*.csv
 temp/*.rds
 temp/*.RData
+all_dam_diagrams.html
+*.html
+*.docx
