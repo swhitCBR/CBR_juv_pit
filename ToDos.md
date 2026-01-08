@@ -1,0 +1,3 @@
+- [ ] Find explicit references and quotations to confirm claims in Introduction 
+	- [[Claims to bolster from introduction]]
+- 

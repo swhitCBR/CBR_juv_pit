@@ -1,0 +1,14 @@
+
+
+
+
+.mermaid svg .node rect {
+    fill: #eeeeee !important;
+    stroke: #999 !important;
+	color:#000000 !important;
+}
+
+/* Ensure arrowheads match the red link color */
+.mermaid svg .marker {
+    fill: #000000 !important;
+}

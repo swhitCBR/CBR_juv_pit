@@ -1,0 +1,62 @@
+---
+title: "all dam diagrams"
+format: 
+  html:
+    css: styles.css
+  
+
+---
+
+
+```{mermaid}
+sequenceDiagram
+  participant Release
+  participant LGR
+  participant MCN
+  participant BON
+  participant Estuary
+
+  
+  Release->>LGR: $$S_{0}$$
+  Note over LGR: $$P_{LGR}$$
+  LGR->>MCN: $$S_{1}$$
+  Note over MCN: $$P_{MCN}$$
+  MCN->>BON: $$S_{2}$$
+  Note over BON: $$P_{BON}$$
+  Note left of Estuary: $$\lambda$$
+  LGR->>BON: $$S_{1} \cdot S_{2}$$
+```
+
+
+
+
+```{mermaid}
+
+sequenceDiagram
+  participant Release
+  participant LGR
+  participant LGS
+  participant LMN
+  participant IHR
+  participant MCN
+  participant JDA
+  participant BON
+  participant BON
+  participant Estuary
+  
+  Release->>LGR: $$S_{0}$$
+  Note over LGR: $$P_{LGR}$$
+
+  LGR->>MCN: $$S_{1}$$
+  Note over MCN: $$P_{MCN}$$
+  MCN->>BON: $$S_{2}$$
+  Note over BON: $$P_{BON}$$
+  Note left of Estuary: $$\lambda$$
+  LGR->>BON: $$S_{1} \cdot S_{2}$$
+
+
+
+
+
+```
+

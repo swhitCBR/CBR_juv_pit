@@ -13,8 +13,6 @@
 	- m-array formulation
 		- 
 
-
-
 |       | $X_{11}$ |
 | ----- | -------- |
 | $R_1$ |          |
@@ -23,11 +21,6 @@
 ```mermaid
 
 ```
-
-
-
-- 
-
 
 | d | d |
 | $R_1$ | $X_{11}$ |
@@ -42,4 +35,4 @@
 - $S=$Effect of survival rate in a study with treatment and control subjects
 	- $S=\psi_{t1}/\psi_{c1}$ 
 
-![[Pasted image 20251219174650.png]]![[Pasted image 20251219174706.png]]![[Pasted image 20251219174726.png]]![[Pasted image 20251219174739.png]]
+![[Pasted image 20251219174650.png]]![[Pasted image 20251219174706.png]]
