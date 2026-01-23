@@ -9,3 +9,4 @@ temp/*.RData
 all_dam_diagrams.html
 *.html
 *.docx
+est_files/*.rds
