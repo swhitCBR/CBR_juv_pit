@@ -3,6 +3,7 @@ library(ggplot2)
 library(lubridate)
 library(reshape2)
 library(gridExtra)
+library(magick)
 
 mytheme=theme(axis.line = element_line(colour = "black"),
               axis.title=element_text(colour = "black",size = 18),
@@ -23,9 +24,6 @@ mytheme=theme(axis.line = element_line(colour = "black"),
               legend.text =element_text(size=12),
               plot.title = element_text(hjust = 0,size=18))
 
-
-
-library(magick)
 
 bin_tab_ls_combDFwYR <- readRDS("comp_files/bin_tab_ls_combDFwYR_9825_wPD568.rds")
 
