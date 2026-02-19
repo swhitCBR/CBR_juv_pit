@@ -52,7 +52,7 @@ nll_obs_numMLE <- lik_fn_burn(
   lambda=pars_obs[3],
   nvec = obs_cell_vals)
 
-n_sim <- 1000
+n_sim <- 10000
 sim_mat <- t(rmultinom(n=n_sim,prob = cell_prob,size = V))
 
 ii=1
@@ -81,19 +81,19 @@ for(ii in 1:n_sim){
 
 # my_ls[[ii]]
 
-saveRDS(my_ls,"mysim10.rds")
-
-mysim15<- rbind(
-  do.call(rbind,readRDS("mysim1.rds")),
-  do.call(rbind,readRDS("mysim2.rds")),
-  do.call(rbind,readRDS("mysim3.rds")),
-  do.call(rbind,readRDS("mysim4.rds")),
-  do.call(rbind,readRDS("mysim5.rds")),
-  do.call(rbind,readRDS("mysim6.rds")),
-  do.call(rbind,readRDS("mysim7.rds")),
-  do.call(rbind,readRDS("mysim8.rds")),
-  do.call(rbind,readRDS("mysim9.rds")),
-  do.call(rbind,readRDS("mysim10.rds")))
+saveRDS(my_ls,"mysim1_10k.rds")
+# 
+# mysim15<- rbind(
+#   do.call(rbind,readRDS("mysim1.rds")),
+#   do.call(rbind,readRDS("mysim2.rds")),
+#   do.call(rbind,readRDS("mysim3.rds")),
+#   do.call(rbind,readRDS("mysim4.rds")),
+#   do.call(rbind,readRDS("mysim5.rds")),
+#   do.call(rbind,readRDS("mysim6.rds")),
+#   do.call(rbind,readRDS("mysim7.rds")),
+#   do.call(rbind,readRDS("mysim8.rds")),
+#   do.call(rbind,readRDS("mysim9.rds")),
+#   do.call(rbind,readRDS("mysim10.rds")))
 
 mysim15$P2 <- plogis(mysim15$P2)
 mysim15$S1 <- exp(mysim15$S1)
@@ -166,8 +166,8 @@ abline(v=nll_obs_analytMLE,lwd=2,col=4)
 ggplot(data=mysim15,aes(x=P2,color=Lambda)) + 
   geom_histogram(bins=50) + 
   
-
-ggplot(data=mysim15,aes(x=S1,color=Lambda)) + 
+  
+  ggplot(data=mysim15,aes(x=S1,color=Lambda)) + 
   geom_density()
 
 

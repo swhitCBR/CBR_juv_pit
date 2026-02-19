@@ -12,9 +12,9 @@
 # 
 # source("R/get_CJS_count_ls.R")
 # 
-# source("R/CJS_aggre_fxns.R")
-# source("R/CJS_aggre_est_2per.R")
-# source("R/get_mom_mat.R")
+source("R/CJS_aggre_fxns.R")
+source("R/CJS_aggre_est_2per.R")
+source("R/get_mom_mat.R")
 # 
 # MCN_cjs_dataset_ls <- CJS_aggre_fxns(dat_in=mcn_dh_tab2,DH_cols="DH_red")
 # lapply(MCN_cjs_dataset_ls$dat_ls_RTsep,dim)
@@ -50,7 +50,7 @@
 # head(LGR_all_out$outDF)
 # table(LGR_all_out$outDF$aggre_lev)
 # 
-# SUB <- LGR_all_out$outDF[1:3,]
+SUB <- LGR_all_out$outDF[1:3,]
 # 
 # SUB$swB <- SUB$n.11+SUB$n.01
 # SUB$swA <- SUB$n.11+SUB$n.10

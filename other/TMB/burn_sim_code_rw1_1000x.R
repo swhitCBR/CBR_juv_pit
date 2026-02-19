@@ -5,7 +5,7 @@ source("C:/repos/CBR_juv_pit/other/TMB/per2_SURPH_ests.R")
 lgr_est_outDF2 <- readRDS("C:/repos/CBR_juv_pit/est_files/lgr_est_outDF2.rds")
 lgr_est_outDF3 <- readRDS("C:/repos/CBR_juv_pit/est_files/lgr_est_outDF3.rds")
 
-V <- lgr_est_outDF2[1,14]
+V <- lgr_est_outDF2[1,14]*1000
 S1 <- lgr_est_outDF2[1,19]
 P2 <- lgr_est_outDF2[1,20]
 Lambda <- lgr_est_outDF2[1,21]
@@ -81,19 +81,22 @@ for(ii in 1:n_sim){
 
 # my_ls[[ii]]
 
-saveRDS(my_ls,"mysim10.rds")
+saveRDS(my_ls,"mysim1_x1000.rds")
+# 
+# mysim15<- rbind(
+#   do.call(rbind,readRDS("mysim1.rds")),
+#   do.call(rbind,readRDS("mysim2.rds")),
+#   do.call(rbind,readRDS("mysim3.rds")),
+#   do.call(rbind,readRDS("mysim4.rds")),
+#   do.call(rbind,readRDS("mysim5.rds")),
+#   do.call(rbind,readRDS("mysim6.rds")),
+#   do.call(rbind,readRDS("mysim7.rds")),
+#   do.call(rbind,readRDS("mysim8.rds")),
+#   do.call(rbind,readRDS("mysim9.rds")),
+#   do.call(rbind,readRDS("mysim10.rds")))
 
 mysim15<- rbind(
-  do.call(rbind,readRDS("mysim1.rds")),
-  do.call(rbind,readRDS("mysim2.rds")),
-  do.call(rbind,readRDS("mysim3.rds")),
-  do.call(rbind,readRDS("mysim4.rds")),
-  do.call(rbind,readRDS("mysim5.rds")),
-  do.call(rbind,readRDS("mysim6.rds")),
-  do.call(rbind,readRDS("mysim7.rds")),
-  do.call(rbind,readRDS("mysim8.rds")),
-  do.call(rbind,readRDS("mysim9.rds")),
-  do.call(rbind,readRDS("mysim10.rds")))
+  do.call(rbind,readRDS("mysim1_x1000.rds")))
 
 mysim15$P2 <- plogis(mysim15$P2)
 mysim15$S1 <- exp(mysim15$S1)
@@ -150,8 +153,8 @@ grid.arrange(ps_samp_dist_plt,
              ls_samp_dist_plt,
              lp_samp_dist_plt,
              ggplot(data=mysim15,aes(x=nll)) + 
-               geom_histogram(bins=50) + 
-               geom_vline(xintercept = nll_obs_numMLE)
+               geom_histogram(bins=50) #+ 
+               # geom_vline(xintercept = nll_obs_numMLE)
              ,ncol=2)
 
 
@@ -166,8 +169,8 @@ abline(v=nll_obs_analytMLE,lwd=2,col=4)
 ggplot(data=mysim15,aes(x=P2,color=Lambda)) + 
   geom_histogram(bins=50) + 
   
-
-ggplot(data=mysim15,aes(x=S1,color=Lambda)) + 
+  
+  ggplot(data=mysim15,aes(x=S1,color=Lambda)) + 
   geom_density()
 
 
