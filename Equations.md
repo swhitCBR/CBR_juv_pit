@@ -27,38 +27,22 @@ $$
 P(y_{j}=0|\pi_{j},R)
 $$
 $$
-{R \choose  n_{10},n_{01},n_{11}} \pi_{10}^{n_{10}} + \pi_{01}^{n_{01}} +\pi_{11}^{n_{11}}
+{R \choose  n_{11},n_{10},n_{01},n_{11}} \pi_{11}^{n_{11}}+\pi_{10}^{n_{10}} + \pi_{01}^{n_{01}}  + \pi_{00}^{n_{00}}
 
 $$
-
-
-
 
 Multinomial probability distribution for Release size R and cell probabilities and cell counts
-$$
-\frac{R!}{n_{10}!,n_{01}!,n_{11}!}\pi_{10}^{n_{10}} + \pi_{01}^{n_{01}} +\pi_{11}^{n_{11}}
-
-$$
 p, S, and lambda
-
 
 $\pi_{11}=S_{1} \cdot p_{1} \cdot \lambda$
 $\pi_{10}=S_{1} \cdot p_{1} \cdot (1-\lambda)$
 $\pi_{01}=S_{1} \cdot (1-p_{1}) \cdot \lambda$
 
 
-
-
-
-
-
 $$
 {R \choose  n_{j}} \pi_j^{n_j}+(1-\pi_j)^{R-n_j}
 
 $$
-
-
-![[Pasted image 20251223153033.png]]
 if n_j is zero then
 $$
 ={R \choose  0} \pi^{0}+(1-\pi)^{R-0}
