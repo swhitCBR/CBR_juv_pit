@@ -87,11 +87,39 @@ prim_obssites <- c(
   # INT_sites2[ INT_sites2$SiteCode %in% c("GRX","MCX"),]$SiteCode # experimental receivers that were active around the time of the changeover to GRJ and MCJ, respectively
 )
 
-length(prim_obssites)
-
 prim_obssiteDF <- data.frame(obssite=prim_obssites)
-prim_obssiteDF
 prim_obssiteDF$loc_cat <- c("LGR","BON","BON","LGS","LGR","JDA","LMN","MCN",rep("Estuary",9),"ICH")#[1:18]# added later
 
-prim_obssiteDF
+
+
+# INT_sites2[INT_sites2$SiteCode %in% c("PD5","PD6","PD8"),]
+# PD5,PD6, PD8 are duplicated
+INT_sites2[duplicated(INT_sites2$SiteCode),]
+INT_sites2[duplicated(INT_sites2$SiteCode),]
+
+# MRR_sites$MRR.Site.Info.Name
+AV_RECOV_sites <- MRR_sites %>% filter(MRR.Site.Info.Code %in% c("ESANIS","ASMEBR","MLRSNI","RICEIS"))
+names(AV_RECOV_sites) <- c("obssite","Name","RKM","SiteType","HUC8Code","subbasin","Latitude","Longitude","metric")
+head(AV_RECOV_sites)
+AV_RECOV_sites$loc_cat <- "Estuary"
+
+# without duplicates
+INT_sites3 <- INT_sites2[!duplicated(INT_sites2$SiteCode),]
+
+prim_obssiteDF %>% left_join(INT_sites3 %>% rename(obssite=SiteCode) %>% 
+                               select(obssite,Name,SiteType,StreamName,Latitude,Longitude,RKM,FirstYear,LastYear,HUC8Code),
+                             by="obssite") %>% bind_rows(AV_RECOV_sites %>% select(-subbasin,-metric)) %>% select()
+
+
+int_recov_sites_ls <- list(# interrogation sites
+  "prim_obssiteDF"=prim_obssiteDF,
+  # intradam release codes
+  "codes_non_lgr_intradam_codes"=codes_non_lgr_intradam_codes)
+
+
+saveRDS(int_recov_sites_ls,"comp_files/int_recov_sites_ls")
+
+
+
+
 
