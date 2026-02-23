@@ -8,20 +8,6 @@
         "type": "tabs",
         "children": [
           {
-            "id": "e3e67e47308c858b",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Spill Category.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Spill Category"
-            }
-          },
-          {
             "id": "65931f3c18d9195b",
             "type": "leaf",
             "state": {
@@ -33,104 +19,6 @@
               },
               "icon": "lucide-file",
               "title": "ToDos"
-            }
-          },
-          {
-            "id": "d464bf02c4d583b9",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Mermaid chart code for Lebreton et al. (1992) table 3.md",
-                "mode": "preview",
-                "source": true
-              },
-              "icon": "lucide-file",
-              "title": "Mermaid chart code for Lebreton et al. (1992) table 3"
-            }
-          },
-          {
-            "id": "32fc99badb5f2b42",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Compilation information.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Compilation information"
-            }
-          },
-          {
-            "id": "a819c8be71cce51a",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Spill Category.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Spill Category"
-            }
-          },
-          {
-            "id": "25ce0b9dd86a027a",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Mermaid chart code for Lebreton et al. (1992) table 3.md",
-                "mode": "preview",
-                "source": true
-              },
-              "icon": "lucide-file",
-              "title": "Mermaid chart code for Lebreton et al. (1992) table 3"
-            }
-          },
-          {
-            "id": "6d9b854eacacc4ca",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "sankey getting there.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "sankey getting there"
-            }
-          },
-          {
-            "id": "82a33a00588b9054",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Diagrams.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Diagrams"
-            }
-          },
-          {
-            "id": "9ba23b74757210ea",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Mulitmodality refs.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Mulitmodality refs"
             }
           },
           {
@@ -148,17 +36,17 @@
             }
           },
           {
-            "id": "7afddb834b90df92",
+            "id": "a819c8be71cce51a",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Lebreton et al. 1992.md",
+                "file": "Spill Category.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Lebreton et al. 1992"
+              "title": "Spill Category"
             }
           },
           {
@@ -167,30 +55,15 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Burnham et al. 1987.md",
+                "file": "Equations.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Burnham et al. 1987"
-            }
-          },
-          {
-            "id": "33b73b1e16a1d809",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Kendall and Nichols 2002.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Kendall and Nichols 2002"
+              "title": "Equations"
             }
           }
-        ],
-        "currentTab": 8
+        ]
       }
     ],
     "direction": "vertical"
@@ -353,27 +226,34 @@
       "bases:Create new base": false
     }
   },
-  "active": "9ba23b74757210ea",
+  "active": "65931f3c18d9195b",
   "lastOpenFiles": [
+    "scratch.md",
+    "Equations.md",
+    "sankey getting there.md",
+    "Mermaid chart code for Lebreton et al. (1992) table 3.md",
+    "ToDos.md",
     "Diagrams.md",
     "Mulitmodality refs.md",
-    "comb_wide_DF.csv",
-    "ann_estsTAB_rev1_det.xlsx",
-    "EFB66120",
-    "~$ann_estsTAB_rev1_det.xlsx",
-    "R/LGR_summ_tab_fns.R",
-    "ann_estsTAB_rev1_det.csv",
-    "ann_estsTAB_rev1_pool.csv",
-    "ann_estsTAB_rev1.csv",
-    "analysis/figuring out usable estimates top down.R",
-    "analysis",
-    "scratch.md",
+    "scratchpad.R",
+    "R/get_raw_release_tab.R",
+    "R/get_rel_yr_vs_migyr_tb.R",
+    "R/get_EXCLU_raw_DET_LGRRRR_tab.R",
+    "R/get_raw_DET_LGRRRR_tab.R",
+    "R/get_release_tab.R",
+    "get_release_tab.R",
+    "02c filtering out transport dup LGR dets.R",
+    "reform_02_03_04.R",
+    "viewing_raw_obs_older look.R",
+    "key ref notes/Claims to bolster from introduction.md",
+    "key ref notes/sheather and Jones and unbiased cross-validation bandwidth selector.md",
+    "key ref notes/Lebreton et al. 1992.md",
+    "key ref notes/Burnham et al. 1987.md",
+    "key ref notes/Kendall and Nichols 2002.md",
     "Lebreton et al. 1992.md",
     "Kendall and Nichols 2002.md",
     "Burnham et al. 1987.md",
-    "Equations.md",
     "Untitled.md",
-    "ToDos.md",
     "sheather and Jones and unbiased cross-validation bandwidth selector.md",
     "pngs/temp_and_est_plts/mcn_det_SR_Sthd_W.png",
     "pngs/temp_and_est_plts/mcn_det_SR_Sthd_H.png",
@@ -388,11 +268,9 @@
     "Spill Category.md",
     "mermaid_diagrams.md",
     "Compilation information.md",
-    "Mermaid chart code for Lebreton et al. (1992) table 3.md",
     "Untitled 2.md",
     "Claims to bolster from introduction.md",
     "merm_test2.knit.md",
-    "sankey getting there.md",
     "README.md"
   ]
 }
