@@ -101,8 +101,8 @@ LGR_summ_tab_fn1 <- function(lgr_est_tb_in,csv_base_nm="ann_estsTAB_rev1_",write
                  "pool"=ann_estsTAB_rev1_pool)
   
   if(write.cvs){
-    write.csv(out_ls$"det",paste0(csv_base_nm,"det.csv"),row.names = F)
-    write.csv(out_ls$"pool",paste0(csv_base_nm,"pool.csv"),row.names = F)
+    write.csv(out_ls$"det",paste0("temp/",csv_base_nm,"det.csv"),row.names = F)
+    write.csv(out_ls$"pool",paste0("temp/",csv_base_nm,"pool.csv"),row.names = F)
   }
   return(out_ls)
   }
