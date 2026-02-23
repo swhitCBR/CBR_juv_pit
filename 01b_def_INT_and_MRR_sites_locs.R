@@ -36,16 +36,33 @@ MRR_sites <- data.frame(readxl::read_xlsx("temp/PITAGIS_dart_INT_MRR_12-23-25.xl
 Int_sites_ant  <- data.frame(readxl::read_xlsx("temp/PITAGIS_dart_INT_MRR_12-23-25.xlsx",sheet = "DART_PIT Tag Interrogation Site"))
 Intra_dam_codes  <- data.frame(readxl::read_xlsx("temp/PITAGIS_dart_INT_MRR_12-23-25.xlsx",sheet = "Intra-Dam Release Site Codes"))
 
+ # %in% INT_sites$SiteCode
+INT_sites %>% filter(SiteCode  %in% c("PDO","PDW","PD5","PD6","PD8"))
+
+
 # SUPLEMENTING INT_sites with PD5, PD6, and PD8 information
-# https://www.ptagis.org/Sites/InterrogationSites?code=PD5
+# # https://www.ptagis.org/Sites/InterrogationSites?code=PD5
+# supp_pds <-   data.frame(SiteType="Instream Remote Detection System",
+#                          SiteCode=c("PD5","PD6","PD8"),
+#                          RKM=c("062","068","0.082"),
+#                          matrix(
+#                            c(46.205748, -123.431179,
+#                              46.152328, -123.385374,
+#                              46.166489, -123.225002),
+#                            ncol=2,byrow=T,dimnames = list(NULL,c("Latitude","Longitude"))))
+
+# https://www.ptagis.org/Sites/InterrogationSites?code=PD0
+# https://www.ptagis.org/Sites/InterrogationSites?code=PDW
 supp_pds <-   data.frame(SiteType="Instream Remote Detection System",
-                         SiteCode=c("PD5","PD6","PD8"),
-                         RKM=c("062","068","0.082"),
+                         SiteCode=c("PD0","PDW"),
+                         RKM=c("075","075"),
                          matrix(
-                           c(46.205748, -123.431179,
-                             46.152328, -123.385374,
-                             46.166489, -123.225002),
+                           c(46.148131,-123.297803,
+                             46.150972, -123.305667),
                            ncol=2,byrow=T,dimnames = list(NULL,c("Latitude","Longitude"))))
+
+
+
 
 INT_sites$RKM <- as.character(INT_sites$RKM)
 INT_sites2 <- bind_rows(INT_sites,supp_pds)
@@ -81,14 +98,14 @@ prim_obssites <- c(
   # nonexperimental JBSs
   INT_sites2[INT_sites2$SiteType=="Juvenile Fish Bypass Facility" & INT_sites2$SiteCode %in% c("GRJ","GOJ","LMJ","MCJ","JDJ","B2J","BCC"),]$SiteCode, #"B1J","BVX","BVJ"
   INT_sites2[INT_sites2$SiteType=="Trawl Net",]$SiteCode,
-  INT_sites2[INT_sites2$SiteType=='Instream Remote Detection System' & INT_sites2$SiteCode %in% c("PD5","PD6","PD7","PD8"),]$SiteCode,
+  INT_sites2[INT_sites2$SiteType=='Instream Remote Detection System' & INT_sites2$SiteCode %in% c("PD5","PD6","PD7","PD8","PDO","PDW"),]$SiteCode,
   # Ice harbor combined
   INT_sites2[ INT_sites2$SiteCode %in% c("ICH"),]$SiteCode#,
   # INT_sites2[ INT_sites2$SiteCode %in% c("GRX","MCX"),]$SiteCode # experimental receivers that were active around the time of the changeover to GRJ and MCJ, respectively
 )
 
 prim_obssiteDF <- data.frame(obssite=prim_obssites)
-prim_obssiteDF$loc_cat <- c("LGR","BON","BON","LGS","LGR","JDA","LMN","MCN",rep("Estuary",9),"ICH")#[1:18]# added later
+prim_obssiteDF$loc_cat <- c("LGR","BON","BON","LGS","LGR","JDA","LMN","MCN",rep("Estuary",7),"ICH")#[1:18]# added later
 
 
 
@@ -106,10 +123,11 @@ AV_RECOV_sites$loc_cat <- "Estuary"
 # without duplicates
 INT_sites3 <- INT_sites2[!duplicated(INT_sites2$SiteCode),]
 
-prim_obssiteDF %>% left_join(INT_sites3 %>% rename(obssite=SiteCode) %>% 
+prim_obssiteDF <- prim_obssiteDF %>% left_join(INT_sites3 %>% rename(obssite=SiteCode) %>% 
                                select(obssite,Name,SiteType,StreamName,Latitude,Longitude,RKM,FirstYear,LastYear,HUC8Code),
-                             by="obssite") %>% bind_rows(AV_RECOV_sites %>% select(-subbasin,-metric)) %>% select()
+                             by="obssite") %>% bind_rows(AV_RECOV_sites %>% select(-subbasin,-metric))
 
+# prim_obssiteDF$SiteType[prim_obssiteDF$obssite=="ICH"] <- 
 
 int_recov_sites_ls <- list(# interrogation sites
   "prim_obssiteDF"=prim_obssiteDF,
@@ -117,7 +135,7 @@ int_recov_sites_ls <- list(# interrogation sites
   "codes_non_lgr_intradam_codes"=codes_non_lgr_intradam_codes)
 
 
-saveRDS(int_recov_sites_ls,"comp_files/int_recov_sites_ls")
+saveRDS(int_recov_sites_ls,"comp_files/int_recov_sites_ls.rds")
 
 
 

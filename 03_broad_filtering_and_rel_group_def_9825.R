@@ -1,103 +1,20 @@
-load("temp/data_comp_WS_9825.Rdata")
-
-head(raw_DF)
-table(tagDF$relsite)
-
-bt_all <- proc.time()
-
 library(foreign)
 library(dplyr)
 library(reshape2)
 
-bt_total <- proc.time()
-# source("functions.R")
-source("02c_load_spat_dat.R")
-
-#### Loading and combining raw obs and tag files ####
-
-
-in_dir="comp_files/data_9825_comp"
-if(!dir.exists(in_dir)){dir.create(in_dir,recursive = T)}
-
-# separates obs and tags within workspace
-ESU_nms=c("SR_Ch1","SR_Sthd","SR_Sock")
-
-obs_comb_raw=raw_DF
-tags_comb_raw <- data.frame(obs_comb_raw[match(tagDF$tagid,obs_comb_raw$tagid),c("esutype","event","species","run")],tagDF)
-names(tags_comb_raw)[2] <- "hist_type"
-
-rm(raw_DF)
-rm(tagDF)
-table(obs_comb_raw$obssite)
-
-# doubted this would work as is
-# raw_TWX_DF <- readRDS("temp/data_9823_comp_SI_test_TWX/raw_TWX_DF.RDS")
-
-
-raw_TWX_DF <- readRDS("temp/data_9825_TWX/raw_TWX_DF_9825.rds")
+tags_comb <- (readRDS("temp/tags_and_obs_comb_ls9825.rds"))$"tags_comb"
+obs_comb <- (readRDS("temp/tags_and_obs_comb_ls9825.rds"))$"obs_comb"
 
 
 
-all(raw_TWX_DF$tagid %in% c(tags_comb_raw$tagid))
-head(tags_comb_raw)
-all(raw_TWX_DF$tagid %in% c(obs_comb_raw$tagid))
-head(raw_TWX_DF)
-obs_comb_rawNOTWX <- obs_comb_raw
 
 
-############################ #
-# ADDING TWX DETAILS  
-############################ #
 
-bt=proc.time()
-obs_comb_raw <- obs_comb_raw %>% left_join(raw_TWX_DF %>% select(tagid,obssite,obsdetail,mintime))
-proc.time()-bt
 
-TWX_tags <- unique(obs_comb_raw %>% filter(!is.na(obs_comb_raw$obsdetail)) %>% pull(tagid))
-obs_comb_TWX <- obs_comb_raw %>% filter(tagid %in% TWX_tags)
-table(obs_comb_raw$obsdetail,obs_comb_raw$migryr)
-table(obs_comb_TWX$obsdetail,obs_comb_TWX$migryr)
-data.frame(table(obs_comb_raw$obssite)[order(names(table(obs_comb_raw$obssite)))])
 
-######################################################################################## #
-#### creating tagid lists Adding TRUE/FALSE columns to tag data for filtering ####
-######################################################################################## #
 
-data.frame(table(obs_comb_raw$obssite))
 
-# tag groupings
-tags_w_trans_lab <- unique(obs_comb_raw$tagid[obs_comb_raw$trans_status!=""])
-tags_non_lgr_intradam_tags <- tags_comb_raw[tags_comb_raw$relsite %in% codes_non_lgr_intradam_codes,]$tagid
-tags_off_lgr_rel <- unique(tags_comb_raw$tagid[tags_comb_raw$relsite=="LGRRRR"])
 
-tags_comb_raw$trans_statTF <- tags_comb_raw$tagid %in% tags_w_trans_lab
-tags_comb_raw$nonLGR_intra_dam_rel <- tags_comb_raw$tagid %in% tags_non_lgr_intradam_tags
-tags_comb_raw$lgr_rel <- tags_comb_raw$tagid %in% tags_off_lgr_rel
-
-# adding column for excluded tags
-tags_comb_raw$excluded=(tags_comb_raw$trans_statTF | tags_comb_raw$nonLGR_intra_dam_rel)
-obs_comb_raw$excluded=(obs_comb_raw$tagid %in% c(tags_comb_raw$tagid[tags_comb_raw$excluded]))
-
-# classifying observation sites as Primary or secondary and surface vs. nonsurface
-obs_comb_raw$obssite_prim <- obs_comb_raw$obssite %in% prim_obssiteDF$obssite
-obs_comb_raw$prim_loc_cat <- prim_obssiteDF$loc_cat[match(obs_comb_raw$obssite,prim_obssiteDF$obssite)]
-obs_comb_raw$prim_surface <- obs_comb_raw$obssite %in% c("GRS","BCC")
-tags_comb_raw$event <- obs_comb_raw$event[match(tags_comb_raw$tagid,obs_comb_raw$tagid)]
-
-#### filtering tags and observations ####
-
-message("Filtering out tags flagged by DART transport filter OR without 'LGRRRR' release site")
-tags_comb <- tags_comb_raw[!(tags_comb_raw$trans_statTF | tags_comb_raw$nonLGR_intra_dam_rel),]
-
-# removing tags from observation record
-# obs_comb <- obs_comb_raw[obs_comb_raw$tagid %in% tags_comb$"tagid",]
-# rm(obs_comb)
-obs_comb <- filter(obs_comb_raw,tagid %in% tags_comb$"tagid") %>%
-  arrange(tagid,mintime) %>%  
-  group_by(tagid) %>% filter(obssite!="GRX") %>% # eliminating duplicate times from GRX
-  mutate(detID_raw=seq_along(mintime))
-
-gc()
 
 
 
@@ -112,7 +29,6 @@ tagDF_sub_lgr_rel$event <- ifelse(tagDF_sub_lgr_rel$event=="release_only","detec
 
 # substitute release site name of interrogation site name MMR site name
 # tagDF_sub_lgr_rel$obssite[tagDF_sub_lgr_rel$event=="virt_detection"]="LGRRRR"
-
 
 sub_lgr_rel_obs <- obs_comb[obs_comb$relsite=="LGRRRR",]
 sub_lgr_rel_obs$obssiteORIG <- sub_lgr_rel_obs$obssite
@@ -165,10 +81,6 @@ DF_look <- sub_lgr_rel_obs[sub_lgr_rel_obs$tagid %in% gr_1day_diff,] %>%
 
 DF_look[,c("tagid","obssites","diff_days")]
 DF_look[DF_look$tagid %in% c("3DD.003D510FB5","3DD.003E29ECB9","3D9.1BF1C0B32E")  ,c("tagid","obssites","diff_days")]
-
-
-
-
 
 # detection
 sub_lgr_det_obs <- obs_comb[obs_comb$relsite!="LGRRRR" & obs_comb$obssite %in% c("GRJ","GRS"),]
@@ -317,7 +229,7 @@ table(defin_detDF$obssite)
 nrow(defin_detDF)
 table(table(defin_detDF$code))
 
-
+saveRDS(obs_rel_grps,"temp/obs_rel_grps.rds")
 # adding definitive detection times to data
 obs_rel_grps2 <- obs_rel_grps %>% 
   left_join(defin_detDF %>% 

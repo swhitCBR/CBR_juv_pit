@@ -138,11 +138,16 @@ rm(rel_onlyDF)
 # in_dir="temp/data_9823_SI_test"
 # out_dir="temp/data_9823_comp_SI_test"
 
-# old location
-save.image("temp/data_comp_WS_9825.Rdata")
+# old approach
+# save.image("temp/data_comp_WS_9825.Rdata")
 
-# newer location on desktop
-# save.image("C:/Users/17072/OneDrive - UW/Desktop/data_comp_WS_23.Rdata")
+rm("det_tags","rel_only_tags","tags_rel_at_LGR","trans_tag_obs")
+gc()
+
+
+DART_ALL_SR_ESU_DPS_rec_ls <- list("raw_DF"=raw_DF,"tagDF"=tagDF)
+saveRDS(DART_ALL_SR_ESU_DPS_rec_ls,"comp_files/DART_ALL_SR_ESU_DPS_rec_ls.rds")
+
 
 rm(list=ls())
 

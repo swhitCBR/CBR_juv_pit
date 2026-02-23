@@ -11,8 +11,6 @@ tagDF_rel_grps <- readRDS("comp_files/tagDF_rel_grps_9825.rds")
 # table(obs_rel_grps2$dat_grp,obs_rel_grps2$obssite_prim)
 # table(obs_rel_grps2$defin_det_yr,obs_rel_grps2$obsdetail)
 
-
-
 # tag summary table
 tagsum2 <- obs_rel_grps2 %>%
   group_by(dat_grp,esutype,reartype,tagid,code) %>%
