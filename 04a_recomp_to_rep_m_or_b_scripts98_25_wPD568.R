@@ -4,12 +4,12 @@ library(dplyr)
 # source("functions.R")
 
 obs_rel_grps2 <- readRDS("comp_files/obs_rel_grps_2_9825.rds")
-tagDF_rel_grps <- readRDS("comp_files/tagDF_rel_grps_9825.rds")
+#  <- readRDS("temp/obs_rel_grps_2_9825.rds")
+# tagDF_rel_grps <- readRDS("temp/tagDF_rel_grps_9825.rds")
+# tags_comb <- (readRDS("temp/tags_and_obs_comb_ls9825.rds"))$"tags_comb"
+tagDF_rel_grps <- readRDS("comp_files/tags_and_obs_comb_ls9825.rds")$"tags_comb"  
 
-
-# table(obs_rel_grps2$dat_grp,obs_rel_grps2$prim_loc_cat)
-# table(obs_rel_grps2$dat_grp,obs_rel_grps2$obssite_prim)
-# table(obs_rel_grps2$defin_det_yr,obs_rel_grps2$obsdetail)
+gc()
 
 # tag summary table
 tagsum2 <- obs_rel_grps2 %>%
@@ -19,6 +19,7 @@ tagsum2 <- obs_rel_grps2 %>%
     defin_det=unique(detID_raw[init_det]),
     n_defins=sum(det_init),
     n_dets=length(det_init)) 
+
 
 # eliminates all tags that do not have a detection at a definitive location (e.g., LGR and MCN)
 bt=proc.time()
@@ -36,31 +37,48 @@ tagsum3 <- obs_rel_grps3 %>% group_by(code) %>%
   summarize(dets_b4=length(detID_defin<0),
             det_after=length(detID_defin<0))
 
-# ~2.2 million unique tags
+# ~2.3 million unique tags
 length(unique(obs_rel_grps3$tagid))
 
-# ~3.5 million tag histories
+# ~3.7 million tag histories
 table(tagsum2$n_defins==1)
 
 #VERY IMPORTANT STEP HERE
 obs_rel_grps3$defin_det_yr[obs_rel_grps3$obssite=="LGRRRR"]
 obs_rel_grps3$detID_defin[obs_rel_grps3$obssite=="LGRRRR"]=0 # an index with zero describing the definitive detection event
 
-
 # Only including the definitive detection and detections that occured afterwards
 obs_rel_grps4 <- obs_rel_grps3 %>% 
   filter(defin_det_yr %in% 1998:2025 & detID_defin>=0) %>%
   group_by(code)
 
-foc_obssites <- c("LGRRRR","B2J","BCC","ESX","GRJ","GRS","MCJ","PD5","PD6","PD7","PD8","TWX")
+prim_obssiteDF <-  readRDS("comp_files/int_recov_sites_ls.rds")$"prim_obssiteDF"
+paste(prim_obssiteDF$obssite,collapse="','")
 
+foc_obssites <-c('GRS','B2J','BCC','GOJ','GRJ','JDJ','LMJ','MCJ','ESX','TWX','PD7','PD6','PD8','PD5','PDW','ICH',"LGRRRRR"
+                 # unclear how to add these as observations
+                 )
+
+obs_rel_grps2 %>% filter(tagid=="222F635313")
+tagDF_rel_grps %>% filter(tagid=="222F635313")
+
+# avian recovery
+# 'ASMEBR','ESANIS','MLRSNI','RICEIS','ASMEBR','ESANIS','MLRSNI','RICEIS'
+
+# foc_obssites <- c("LGRRRR","B2J","BCC","ESX","GRJ","GRS","MCJ","PD5","PD6","PD7","PD8","TWX")
 # were combining will happen
-obs_rel_grps5 <- obs_rel_grps4 %>% filter(obssite %in% foc_obssites) 
+
+obs_rel_grps5 <- obs_rel_grps4 %>%
+  filter(obssite %in% foc_obssites) 
+
 obs_rel_grps5$prim_loc_cat[obs_rel_grps5$obssite=="LGRRRR"]="LGR"
 obs_rel_grps5 <- obs_rel_grps5[!(obs_rel_grps5$prim_loc_cat=="LGR" & obs_rel_grps5$dat_grp=="mcn_det"),]
 
 obs_rel_grps5$det_int_days
-obs_rel_grps6 <- obs_rel_grps5 %>%  filter(as.numeric(det_int_days)<(365/2)) %>% arrange(dat_grp,esutype,defin_det_yr,code,mintime)
+obs_rel_grps6 <- obs_rel_grps5 %>%  
+  filter(as.numeric(det_int_days)<(365/2)) %>% 
+  arrange(dat_grp,esutype,defin_det_yr,code,mintime)
+
 obs_rel_grps6$code2=paste(obs_rel_grps6$code,obs_rel_grps6$prim_loc_cat)
 
 ##################################################### #
@@ -73,6 +91,15 @@ obssite_summ_tab <- obs_rel_grps6 %>% group_by(dat_grp,esutype,defin_det_yr,code
   summarize(
     n_dets=length(code),
     n_codes=length(unique(code)))
+
+nrow(obssite_summ_tab)
+
+####@@@@@@@@
+# exported to04b
+saveRDS(obs_rel_grps6,"comp_files/obs_rel_grps6.rds")
+####@@@@@@@@
+
+
 
 ################################################# #
 # simpified to just the general location name
@@ -118,8 +145,8 @@ summary(as.numeric(difftime(obs_rel_grps6$mintime[obs_rel_grps6$after_end],obs_r
 
 # last 1% of tag detections occur up to 2.5 mnths before and  up to 5.5 months after
 
-difftime(obs_rel_grps6$mintime,obs_rel_grps6$defin_det_time_grp,"days")
-
+# difftime(obs_rel_grps6$mintime,obs_rel_grps6$defin_det_time_grp,"days")
+gc()
 
 # filtering down to only those detections that occured within the middle 99%
 obs_rel_grps7 <- obs_rel_grps6 %>%
@@ -132,6 +159,13 @@ time_cat$off_end=lubridate::floor_date(time_cat$perc99,unit = "12 hours")
 # late March through mid July
 off_used <- time_cat[,c("dat_grp","esutype","defin_det_yr","reartype","grp_code","off_strt","off_end")]
 off_used$tbtw <- difftime(off_used$off_end,off_used$off_strt,"days")
+
+####@@@@@@@@
+# exported to04b
+saveRDS(obs_rel_grps7,"comp_files/obs_rel_grps7.rds")
+####@@@@@@@@
+
+gc()
 
 
 # 267 groups
@@ -149,15 +183,16 @@ off_used <- off_used[off_used$grp_code %in% obs_rel_grps7$grp_code,]
 source("R/make_bin_tab.R")
 
 
-ii=1
-test <- make_bin_tab(strt=off_used$off_strt[ii],
-                     end=off_used$off_end[ii],
-                     interv="month",
-                     row_data=off_used[ii,c(1:5)])
-test
+# ii=1
+# test <- make_bin_tab(strt=off_used$off_strt[ii],
+#                      end=off_used$off_end[ii],
+#                      interv="month",
+#                      row_data=off_used[ii,c(1:5)])
+# test
+# off_used[112,]
 
 
-off_used[112,]
+# JANKY FOR LOOP THAT HAS TO BE RESTARTED WHEN IT BREAKS
 
 bt=proc.time()
 sub_ls=out_ls=list()
@@ -194,12 +229,12 @@ for( ii in 1:nrow(off_used)){
   cat_mat <- sapply(bin_list,function(x){cut(sub_ls[[ii]]$defin_det_time,breaks=x,labels = F)})
   # mx_test=cbind(cat_mat,apply(cat_mat,2,function(x){x==max(x)}))
   
-  # speccial case when cat_mat had only 1 row
+  # # special case when cat_mat had only 1 row
   if(ii %in% c(112,280,424)){
-    
+
     tmp_df <- data.frame(matrix(cat_mat,nrow=1))
     colnames(tmp_df)=names(cat_mat)
-    
+
     out_ls[[ii]] <- data.frame(sub_ls[[ii]],"strt_time"=off_used$off_strt[ii],"end_time"=off_used$off_end[ii],
                                tmp_df)
   } else{
@@ -222,7 +257,8 @@ proc.time()-bt # takes ~ 6.5 min
 # obs_rel_grps9$grp_code
 # bin_tab_ls_combDF
 
-
+head(bin_tab_ls_combDF)
+gc()
 nrow(obs_rel_grps7) #no difference
 nrow(obs_rel_grps8)
 
@@ -240,18 +276,44 @@ obs_rel_grps9 <- obs_rel_grps6 %>%
   filter(within) %>%
   mutate(rnd_det_time=lubridate::floor_date(defin_det_time,unit = "12 hours"))
 
-nrow(obs_rel_grps9)
+head(obs_rel_grps9$code2)
+table(table(obs_rel_grps9$code2))
+#       1       2       3 
+# 4927327     244       2 
+
+
+dup_tagid <- unique(obs_rel_grps9$tagid[duplicated(obs_rel_grps9$code2)])
+
+# data.frame(obs_rel_grps9 %>% filter(tagid %in% dup_tagid[1]))
+data.frame(obs_rel_grps9 %>% filter(tagid %in% dup_tagid[1]) %>% 
+             select(esutype,reartype,prim_loc_cat,obssite,mintime))
+
+data.frame(obs_rel_grps9 %>% filter(dat_grp=="lgr_pooled" & tagid %in% dup_tagid[2]) %>% 
+             select(esutype,reartype,prim_loc_cat,obssite,mintime))
+
+# head(obs_rel_grps9)
+
+# precocious fish?
+# length(dup_tagid)
+
+tagDF_rel_grps %>% filter(tagid %in% dup_tagid ) %>% 
+  select(esutype,reartype,tagid) %>% 
+  group_by(esutype,reartype) %>% 
+  summarize(ntags=length(unique(tagid))) 
+
+
+
+# obs_rel_grps9 %>% filter(tagid %in% obs_rel_grps9[duplicated(obs_rel_grps9$code2),]$tagid)
 obs_rel_grps9 <- obs_rel_grps9[!duplicated(obs_rel_grps9$code2),]
 
-nrow(obs_rel_grps9)
 
 
+# nrow(obs_rel_grps9)
 
+# nrow(obs_rel_grps9)
 # 3920377-3920251 #126 duplicates
-
 # obs_rel_grps9 <- obs_rel_grps6[!duplicated(obs_rel_grps6$code2),]
-
-
+# 
 # names(obs_rel_grps9)
 # obs_rel_grps9$defin_det_time
 # obs_rel_grps9$mintime
@@ -261,21 +323,60 @@ nrow(obs_rel_grps9)
 # 
 # are there any codes in 9 that are not in 8
 # sapply(obs_rel_grps9$code,function(x) x %in% obs_rel_grps8$code)
-
+# 
 # trying to get bin assignments from 8 onto 9
+ # <- readRDS("temp/tagDF_rel_grps_9825.rds")
 
+################################## #
+# adding detection history labels
+################################## #
+
+obs_rel_grps9
+# rel_recov_tgs <- tagDF_rel_grpsNEWER_filt %>% filter(AVIAN_recov) %>% pull(tagid)
+trel_recov_tgs <- tagDF_rel_grps %>% filter(AVIAN_recov) %>% pull(tagid)
+
+# tags remaining after obs fiiltering
+tagDF_rel_9 <- tagDF_rel_grps %>% filter(tagid %in% unique(obs_rel_grps9$tagid))
+head(tagDF_rel_9)
+# nrow(tagDF_rel_9)
+
+# saveRDS(tagDF_rel_9,"temp/tagDF_rel_9.rds")
 
 
 
 dh_tab <- obs_rel_grps9 %>% 
-  group_by(dat_grp,esutype,reartype,defin_det_yr,defin_det_time_grp,grp_code,code) %>%
+  group_by(dat_grp,esutype,reartype,defin_det_yr,defin_det_time_grp,grp_code,code,tagid) %>%
   summarize(DH_label=paste(prim_loc_cat,collapse=" -> "))
 
 
-gc()
+################################## #
+# adding avian recoveries
+################################## #
 
+dh_subb <- dh_tab[dh_tab$tagid %in% rel_recov_tgs,]
+
+# head(dh_tab)
+# table(substr(x=dh_tab$DH_label,(nchar(dh_tab$DH_label)-11),nchar(dh_tab$DH_label))=="-> Estuary")
+unique(substr(x=dh_tab$DH_label,(nchar(dh_tab$DH_label)-9),nchar(dh_tab$DH_label)))
+table(substr(x=dh_tab$DH_label,(nchar(dh_tab$DH_label)-9),nchar(dh_tab$DH_label))=="-> Estuary")
+
+avian_rec <- tagid %in% c(rel_recov_tgs)
+
+dh_tab<- dh_tab %>% mutate(no_estu_end=substr(x=DH_label,(nchar(DH_label)-9),nchar(DH_label))!="-> Estuary",
+                  av_recov=dh_tab$no_estu_end & dh_tab$avian_rec,#,paste0(dh_tab$DH_label," -> Estuary"),dh_tab$DH_label)
+                  DH_label_mod=ifelse(av_recov," -> Estuary"),DH_label)
 head(dh_tab)
 
+
+# dh_tab$DH_label_mod <- ifelse(dh_tab$no_estu_end & dh_tab$avian_rec,paste0(dh_tab$DH_label," -> Estuary"),dh_tab$DH_label)
+# dh_tab$avian_rec <- dh_tab$tagid %in% c(rel_recov_tgs)
+# dh_tab$no_estu_end=substr(x=dh_tab$DH_label,(nchar(dh_tab$DH_label)-9),nchar(dh_tab$DH_label))!="-> Estuary"
+# dh_tab$DH_label_mod <- ifelse(dh_tab$no_estu_end & dh_tab$avian_rec,paste0(dh_tab$DH_label," -> Estuary"),dh_tab$DH_label)
+# dh_tab %>% select(dat_grp,esutype,reartype,defin_det_yr,defin_det_time_grp,DH_label_mod)
+# dh_tab %>% ungroup() %>% select(dat_grp,esutype,reartype,defin_det_yr,defin_det_time_grp,DH_label_mod) %>% filter(dat_grp=="lgr_det")
+
+# head(dh_tab)
+# View(dh_tab[dh_tab$DH_label_mod!=dh_tab$DH_label,])
 # look for transition patterns that should be omitted because they are probably adults 
 # manually replace as neccessary
 table(dh_tab$DH_label) 

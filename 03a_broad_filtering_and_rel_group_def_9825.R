@@ -2,8 +2,8 @@ library(foreign)
 library(dplyr)
 library(reshape2)
 
-tags_comb <- (readRDS("temp/tags_and_obs_comb_ls9825.rds"))$"tags_comb"
-obs_comb <- (readRDS("temp/tags_and_obs_comb_ls9825.rds"))$"obs_comb"
+tags_comb <- (readRDS("comp_files/tags_and_obs_comb_ls9825.rds"))$"tags_comb"
+obs_comb <- (readRDS("comp_files/tags_and_obs_comb_ls9825.rds"))$"obs_comb"
 
 
 table(obs_comb$detID_raw)
@@ -26,8 +26,10 @@ sub_lgr_rel_obs$obssiteORIG <- sub_lgr_rel_obs$obssite
 sub_lgr_rel_obs$obssite <- ifelse(sub_lgr_rel_obs$obssiteORIG=="","LGRRRR",sub_lgr_rel_obs$obssiteORIG)
 
 sub_lgr_rel_obs$eventORIG <- sub_lgr_rel_obs$event
-sub_lgr_rel_obs$event <- ifelse(sub_lgr_rel_obs$eventORIG=="release_only","virt_detection",sub_lgr_rel_obs$eventORIG)
-sub_lgr_rel_obs$mintime <- as.POSIXct(ifelse(sub_lgr_rel_obs$event=="virt_detection",sub_lgr_rel_obs$reltime,sub_lgr_rel_obs$mintime),origin="1970-01-01")
+sub_lgr_rel_obs$event <- ifelse(sub_lgr_rel_obs$eventORIG=="release_only","virt_detection",
+                                sub_lgr_rel_obs$eventORIG)
+sub_lgr_rel_obs$mintime <- as.POSIXct(ifelse(sub_lgr_rel_obs$event=="virt_detection",
+                                             sub_lgr_rel_obs$reltime,sub_lgr_rel_obs$mintime),origin="1970-01-01")
 
 # a row must be added for LGRRRR releases that actually had downstream detections
 # all(sub_lgr_rel_obs$relsite=="LGRRRR")
@@ -71,7 +73,7 @@ DF_look <- sub_lgr_rel_obs[sub_lgr_rel_obs$tagid %in% gr_1day_diff,] %>%
       ,collapse="  "))
 
 DF_look[,c("tagid","obssites","diff_days")]
-DF_look[DF_look$tagid %in% c("3DD.003D510FB5","3DD.003E29ECB9","3D9.1BF1C0B32E")  ,c("tagid","obssites","diff_days")]
+# DF_look[DF_look$tagid %in% c("3DD.003D510FB5","3DD.003E29ECB9","3D9.1BF1C0B32E")  ,c("tagid","obssites","diff_days")]
 
 # detection
 sub_lgr_det_obs <- obs_comb[obs_comb$relsite!="LGRRRR" & obs_comb$obssite %in% c("GRJ","GRS"),]
@@ -84,11 +86,21 @@ sub_mcn_det_obs<- obs_comb[obs_comb$relsite!="LGRRRR" & obs_comb$obssite %in% c(
 # old location of tag dataset definitions
 ################################################# #
 
+
+# obs_rel_grps$mintime <- as.POSIXct(ifelse(obs_rel_grps$event %in% c("virt_detection(0)"),
+#                                           obs_rel_grps$reltime,obs_rel_grps$mintime),origin="1970-01-01")
+
+
 # creating additional rows for treating release as an initial detection event
 virt_dets_lgr_relonly <- subset(obs_comb,tagid %in% sub_lgr_rel_obs$tagid & event=="release_only")
 virt_dets_lgr_relonly$obssite="LGRRRR"
 virt_dets_lgr_relonly$event="virt_detection(0)"
 virt_dets_lgr_relonly$detID_raw=0
+virt_dets_lgr_relonly$mintime <- as.POSIXct(virt_dets_lgr_relonly$reltime)
+
+  # ifelse(virt_dets_lgr_relonly$event %in% c("virt_detection(0)"),
+  #        obs_rel_grps$reltime,obs_rel_grps$mintime),origin="1970-01-01")
+
 all(sub_lgr_rel_obs$detID_raw[sub_lgr_rel_obs$eventORIG=="release_only"])
 
 
@@ -104,18 +116,14 @@ virt_dets_lgr_surrog <- subset(virt_dets_lgr_wsubseq_dets, detID_raw==1)
 virt_dets_lgr_surrog$detID_raw=0
 virt_dets_lgr_surrog$obssiteORIG=virt_dets_lgr_surrog$obssite
 virt_dets_lgr_surrog$obssite="LGRRRR"
+virt_dets_lgr_surrog$prim_loc_cat="LGRRRR"
+virt_dets_lgr_surrog$prim_surface=NA
+virt_dets_lgr_surrog$mintime <- as.POSIXct(virt_dets_lgr_surrog$reltime)
 
-virt_dets_lgr_rel_as_det_wsubseq_dets <- bind_rows(virt_dets_lgr_wsubseq_dets,virt_dets_lgr_surrog)
+virt_dets_lgr_rel_as_det_wsubseq_dets <- bind_rows(virt_dets_lgr_surrog,virt_dets_lgr_wsubseq_dets)
 
 # verifying
 (nrow(virt_dets_lgr_rel_as_det_wsubseq_dets)==nrwcheck)
-
-
-
-# adding special event label
-# virt_dets_lgr$event="virt_detection(>0)"
-# virt_dets_lgr$event="virt_detection(>0)"
-
 
 
 # observations
@@ -128,6 +136,8 @@ obs_rel_grps <- bind_rows(
   data.frame(dat_grp="mcn_det",subset(obs_comb,tagid %in% sub_mcn_det_obs$tagid)))
 nrow(obs_rel_grps)
 
+
+obs_rel_grps %>% filter(tagid=="222F635313")
 
 # sub <- obs_rel_grps[obs_rel_grps$dat_grp=="lgr_pooled" & obs_rel_grps$relsite=="LGRRRR",]
 # sub_lgr_rel_obs <- obs_comb[obs_comb$relsite=="LGRRRR",]
@@ -142,8 +152,14 @@ nrow(obs_rel_grps)
 
 # replacing release time and adding a Juvenile label
 # obs_rel_grps$stage[obs_rel_grps$obssite=="LGRRRR"]="J"
-obs_rel_grps$mintime <- as.POSIXct(ifelse(obs_rel_grps$event %in% c("virt_detection(>0)" ,"virt_detection(0)"),
-                                          obs_rel_grps$reltime,obs_rel_grps$mintime),origin="1970-01-01")
+
+# obs_rel_grps$mintime <- as.POSIXct(ifelse(obs_rel_grps$event %in% c("virt_detection(0)"),
+#                                           obs_rel_grps$reltime,obs_rel_grps$mintime),origin="1970-01-01")
+
+# obs_rel_grps$mintime <- as.POSIXct(ifelse(obs_rel_grps$event %in% c("virt_detection(>0)" ,"virt_detection(0)"),
+#                                           obs_rel_grps$reltime,obs_rel_grps$mintime),origin="1970-01-01")
+
+
 head(obs_rel_grps)
 
 

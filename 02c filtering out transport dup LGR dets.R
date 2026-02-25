@@ -154,7 +154,7 @@ obs_comb <- filter(obs_comb_raw,tagid %in% tags_comb$"tagid") %>%
 gc()
 
 saveRDS(list("tags_comb"=tags_comb,"obs_comb"=obs_comb),
-        "temp/tags_and_obs_comb_ls9825.rds")
+        "comp_files/tags_and_obs_comb_ls9825.rds")
 
 
 nrow(obs_comb_raw)
