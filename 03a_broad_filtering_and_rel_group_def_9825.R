@@ -6,17 +6,8 @@ tags_comb <- (readRDS("temp/tags_and_obs_comb_ls9825.rds"))$"tags_comb"
 obs_comb <- (readRDS("temp/tags_and_obs_comb_ls9825.rds"))$"obs_comb"
 
 
-
-
-
-
-
-
-
-
-
-
-
+table(obs_comb$detID_raw)
+table(is.na(obs_comb$detID_raw))
 
 #### Creating LGR_pooled release group ####
 
@@ -86,40 +77,53 @@ DF_look[DF_look$tagid %in% c("3DD.003D510FB5","3DD.003E29ECB9","3D9.1BF1C0B32E")
 sub_lgr_det_obs <- obs_comb[obs_comb$relsite!="LGRRRR" & obs_comb$obssite %in% c("GRJ","GRS"),]
 sub_mcn_det_obs<- obs_comb[obs_comb$relsite!="LGRRRR" & obs_comb$obssite %in% c("MCJ"),]
 
-# tagid
-tagDF_rel_grps <- rbind(
-  data.frame(dat_grp="lgr_pooled",tags_comb[tags_comb$tagid %in% sub_lgr_rel_obs$tagid,]),
-  data.frame(dat_grp="lgr_pooled",tags_comb[tags_comb$tagid %in% sub_lgr_det_obs$tagid,]),
-  data.frame(dat_grp="lgr_det",tags_comb[tags_comb$tagid %in% sub_lgr_det_obs$tagid,]),
-  data.frame(dat_grp="mcn_det",tags_comb[tags_comb$tagid %in% sub_mcn_det_obs$tagid,]))
-tagDF_rel_grps$relyr <- as.numeric(format(tagDF_rel_grps$reltime,"%Y"))
+# pooled mcnary detections even when LGRRRR is included
+# sub_mcn_det_obs<- obs_comb[ obs_comb$obssite %in% c("MCJ"),]
 
-table(tagDF_rel_grps$event)
-table(tagDF_rel_grps$event)
-
+################################################# #
+# old location of tag dataset definitions
+################################################# #
 
 # creating additional rows for treating release as an initial detection event
 virt_dets_lgr_relonly <- subset(obs_comb,tagid %in% sub_lgr_rel_obs$tagid & event=="release_only")
-# grabing just the first row of the detection record 
-virt_dets_lgr <- subset(obs_comb,tagid %in% sub_lgr_rel_obs$tagid & event!="release_only" & detID_raw==1)
-
-# adding special event label
-virt_dets_lgr$event="virt_detection(>0)"
-virt_dets_lgr$obssiteORIG=virt_dets_lgr$obssite
-
 virt_dets_lgr_relonly$obssite="LGRRRR"
-virt_dets_lgr$obssite="LGRRRR"
 virt_dets_lgr_relonly$event="virt_detection(0)"
 virt_dets_lgr_relonly$detID_raw=0
-virt_dets_lgr$detID_raw=0
 all(sub_lgr_rel_obs$detID_raw[sub_lgr_rel_obs$eventORIG=="release_only"])
+
+
+# LGRRRR releases with subsequent detections
+virt_dets_lgr_wsubseq_dets <- subset(obs_comb,tagid %in% sub_lgr_rel_obs$tagid & event!="release_only")
+virt_dets_lgr_wsubseq_dets$event="virt_detection(>0)"
+nrow(virt_dets_lgr_wsubseq_dets)
+nrwcheck <- nrow(virt_dets_lgr_wsubseq_dets) + length(unique(virt_dets_lgr_wsubseq_dets$tagid))
+
+# grabbing only the first row to create a detection surrogate at time of release at LGR
+# detID_raw will be wet to zero
+virt_dets_lgr_surrog <- subset(virt_dets_lgr_wsubseq_dets, detID_raw==1)
+virt_dets_lgr_surrog$detID_raw=0
+virt_dets_lgr_surrog$obssiteORIG=virt_dets_lgr_surrog$obssite
+virt_dets_lgr_surrog$obssite="LGRRRR"
+
+virt_dets_lgr_rel_as_det_wsubseq_dets <- bind_rows(virt_dets_lgr_wsubseq_dets,virt_dets_lgr_surrog)
+
+# verifying
+(nrow(virt_dets_lgr_rel_as_det_wsubseq_dets)==nrwcheck)
+
+
+
+# adding special event label
+# virt_dets_lgr$event="virt_detection(>0)"
+# virt_dets_lgr$event="virt_detection(>0)"
+
 
 
 # observations
 obs_rel_grps <- bind_rows(
   data.frame(dat_grp="lgr_pooled",virt_dets_lgr_relonly),
-  data.frame(dat_grp="lgr_pooled",virt_dets_lgr),
+  data.frame(dat_grp="lgr_pooled",virt_dets_lgr_rel_as_det_wsubseq_dets),
   data.frame(dat_grp="lgr_pooled",subset(obs_comb,tagid %in% sub_lgr_det_obs$tagid)),
+  
   data.frame(dat_grp="lgr_det",subset(obs_comb,tagid %in% sub_lgr_det_obs$tagid)),
   data.frame(dat_grp="mcn_det",subset(obs_comb,tagid %in% sub_mcn_det_obs$tagid)))
 nrow(obs_rel_grps)
@@ -138,7 +142,8 @@ nrow(obs_rel_grps)
 
 # replacing release time and adding a Juvenile label
 # obs_rel_grps$stage[obs_rel_grps$obssite=="LGRRRR"]="J"
-obs_rel_grps$mintime <- as.POSIXct(ifelse(obs_rel_grps$event %in% c("virt_detection(>0)" ,"virt_detection(0)"),obs_rel_grps$reltime,obs_rel_grps$mintime),origin="1970-01-01")
+obs_rel_grps$mintime <- as.POSIXct(ifelse(obs_rel_grps$event %in% c("virt_detection(>0)" ,"virt_detection(0)"),
+                                          obs_rel_grps$reltime,obs_rel_grps$mintime),origin="1970-01-01")
 head(obs_rel_grps)
 
 
@@ -148,13 +153,34 @@ bt=proc.time()
 obs_rel_grps <- obs_rel_grps %>% arrange(dat_grp,esutype,reartype,tagid,mintime)
 proc.time()-bt
 
-
 table(obs_rel_grps$event,obs_rel_grps$dat_grp,obs_rel_grps$esutype)
-table(tagDF_rel_grps$event,tagDF_rel_grps$dat_grp,tagDF_rel_grps$esutype)
+
+# OLD AND BAD UNDERCOUNT
+# , ,  = SR_Ch1
+# lgr_det lgr_pooled mcn_det
+# detection          1383675    1383675  993083
+# release_only             0          0       0
+# virt_detection(>0)       0     214931       0
+# virt_detection(0)        0     134566       0
+# 
+# , ,  = SR_Sock
+# lgr_det lgr_pooled mcn_det
+# detection           169210     169210   39680
+# release_only             0          0       0
+# virt_detection(>0)       0          3       0
+# virt_detection(0)        0          2       0
+# 
+# , ,  = SR_Sthd
+# lgr_det lgr_pooled mcn_det
+# detection           881182     881182  290388
+# release_only             1          1       0
+# virt_detection(>0)       0     194294       0
+# virt_detection(0)        0     159552       0
+# table(tagDF_rel_grps$event,tagDF_rel_grps$dat_grp,tagDF_rel_grps$esutype)
 
 obs_rel_grps$date=as.Date(obs_rel_grps$mintime)
 obs_rel_grps$year=format(obs_rel_grps$date,"%Y")
-obs_rel_grps$id <- 1:nrow(obs_rel_grps)
+obs_rel_grps$id <- 1:nrow(obs_rel_grps) # row index
 
 # finding rows with a MCN and LGR detection
 obs_rel_grps$mcn_det <- obs_rel_grps$dat_grp=="mcn_det" & obs_rel_grps$obssite %in% c("MCJ")
@@ -172,6 +198,7 @@ tmpB <- obs_rel_grps[#obs_rel_grps$stage=="J" &
   obs_rel_grps$dat_grp=="mcn_det" &  (obs_rel_grps$obssite %in% c("MCJ")),]
 tmp <- rbind(tmpA,tmpB)
 
+# first detection for LGR and MCN detection data sets
 lowest_ids <- tapply(tmp$id,tmp$code,min)
 
 # what row corresponds with the 
@@ -180,18 +207,19 @@ lowest_ids <- tapply(tmp$id,tmp$code,min)
 # v2_lowest_ids <- obs_rel_grps$id[which(#obs_rel_grps$stage=="J" & 
 #                                          obs_rel_grps$dat_grp=="lgr_pooled" & obs_rel_grps$event!="virt_detection" & obs_rel_grps$obssite %in% c("GRS","GRJ"))]
 
+# LGR releases and detections pooled
 v1_lowest_ids <- obs_rel_grps$id[obs_rel_grps$dat_grp=="lgr_pooled" & obs_rel_grps$obssite %in% c("GRS","GRJ","LGRRRR")]
 
 # v2_lowest_ids <- obs_rel_grps$id[obs_rel_grps$dat_grp=="lgr_pooled" & obs_rel_grps$obssite %in% c("GRS","GRJ","LGRRRR")]
-# 
 # "virt_detection(0)"
 
-
+# LGR releases and detections
 tmp2 <- obs_rel_grps[obs_rel_grps$id %in% c(v1_lowest_ids),]#,v2_lowest_ids),]
 lowest_ids2 <- tapply(tmp2$id,tmp2$code,min)
 
 comb_ids <- c(lowest_ids,lowest_ids2)
 
+# confirming that there are not duplicate rows
 table(duplicated(comb_ids))
 
 # FALSE 
@@ -208,12 +236,110 @@ table(duplicated(comb_ids))
 # table(obs_rel_grps[obs_rel_grps$obssite=="LGRRRR",]$stage)
 
 
+subbb <- obs_rel_grps %>% filter(tagid %in% (obs_rel_grps %>% filter(detID_raw==0) %>% pull(tagid)))
+
+table(subbb$event,subbb$detID_raw)
+
+# table(subbb$detID_raw==0)
+# View(obs_rel_grps %>% filter(tagid %in% (obs_rel_grps %>% filter(detID_raw==0) %>% pull(tagid))))
+# forcing observations without any detections initial detections to be lifestage J
+
+# these are the release events/intial detections for fish  release fish that were never seen again
 obs_rel_grps$stage[obs_rel_grps$detID_raw==0]="J"
+
+table(obs_rel_grps$stage)
+
+# obs_rel_grps$rel
+subbb2 <- obs_rel_grps %>% group_by(esutype,reartype,relyr,tagid) %>% 
+  summarize(stage_v=paste(stage,collapse=","))
+tb_JA_hist_all <- sort(table(subbb2$stage_v),decreasing = T)
+# more than 99% of the time its all Js
+tb_JA_hist_all[cumsum(tb_JA_hist_all)/sum(tb_JA_hist_all)<=0.999]
+strsplit(names(tb_JA_hist_all),split = ",")
+
+
+earliest_stage_mat <- t(sapply(names(tb_JA_hist_all),function(x){
+  vv=strsplit(x,split=",")[[1]]
+  jj=ifelse(is.finite(min(which(vv=="J"))),min(which(vv=="J")),NA)
+  aa=ifelse(is.finite(min(which(vv=="A"))),min(which(vv=="A")),NA)
+  j_after_a=any(which(vv=="J") > min(which(vv=="A")))
+  # jj=ifelse(is.finite(min(which(vv=="J"))),min(which(vv=="J")),NA)
+  c(jj,aa,j_after_a)
+  }))
+
+colnames(earliest_stage_mat) <- c("J","A","j_after_a")
+earliest_stageDF <- data.frame(earliest_stage_mat,seq_stg=rownames(earliest_stage_mat))
+rownames(earliest_stageDF) <- NULL
+earliest_stageDF$Jb4A <- earliest_stageDF$J<earliest_stageDF$A
+
+earliest_stageDF$jb4_ <- ifelse(!is.na(earliest_stageDF$A),earliest_stageDF$J<earliest_stageDF$A,NA)
+# ifelse(!is.na(earliest_stageDF$J),earliest_stageDF$J<earliest_stageDF$A,NA)
+
+
+subbb3 <- obs_rel_grps %>% group_by(esutype,reartype,relyr,tagid) %>%
+  filter(!is.na(prim_loc_cat)) %>%
+  summarize(
+    stage_v=paste(stage,collapse=","))
+tb_JA_hist_prim_loc <- sort(table(subbb3$stage_v),decreasing = T)
+tb_JA_hist_prim_loc[cumsum(tb_JA_hist_prim_loc)/sum(tb_JA_hist_prim_loc)<=0.999]
+
+names(tb_JA_hist_prim_loc)
+
+
+############################################################################# #
+# # investigating the order of 'J's and 'A's grinds everything to a halt
+# subbb3 <- obs_rel_grps %>% group_by(esutype,reartype,relyr,tagid) %>% 
+#   filter(!is.na(prim_loc_cat)) %>%
+#   summarize(
+#     # paste(which(stage=="J"),collapse=","),
+#     # paste(which(stage=="A"),collapse=","),
+#     min_indJ=min(which(stage=="J")),
+#     min_indA=min(which(stage=="A")),
+#     stage_v=paste(stage,collapse=","))
+# 
+############################################################################# #
+
+head(subbb3)
+table(subbb3$stage_v)
+
+# table(obs_rel_grps$stage)
+table(is.na(obs_rel_grps$stage))
+
+# table(subbb2 %>% pull(stage_v))
+############################################################### #
+# table of definitive detctions times (based on comb_ids)
+############################################################### #
+
+
+#################################################### #
+# tagid
+tagDF_rel_grps <- rbind(
+  data.frame(dat_grp="lgr_pooled",tags_comb[tags_comb$tagid %in% sub_lgr_rel_obs$tagid,]),
+  data.frame(dat_grp="lgr_pooled",tags_comb[tags_comb$tagid %in% sub_lgr_det_obs$tagid,]),
+  data.frame(dat_grp="lgr_det",tags_comb[tags_comb$tagid %in% sub_lgr_det_obs$tagid,]),
+  # data.frame(dat_grp="mcn_pooled",tags_comb[tags_comb$tagid %in% sub_mcn_det_obs$tagid,]) # would need more modification
+  data.frame(dat_grp="mcn_det",tags_comb[tags_comb$tagid %in% sub_mcn_det_obs$tagid,]))
+tagDF_rel_grps$relyr <- as.numeric(format(tagDF_rel_grps$reltime,"%Y"))
+
+table(tagDF_rel_grps$event)
+table(tagDF_rel_grps$event)
+
+
+######################## #
+
+# breakdown of tags present in each dat_grp
+table(table(tagDF_rel_grps$tagid))
+#       1       2       3 
+# 1075116  975316  149009 
+# 1110146 1083828  151194 revised is the same
+
+#################################################### #
+
 
 # table of definitive detection times for tags
 defin_detDF <- obs_rel_grps %>% 
   filter(id %in% comb_ids) %>% 
-  filter(stage=="J") %>% # only juvenile
+  filter(stage=="J") %>% # only juvenile initial detection allowed
   mutate(defin_det_time=mintime ) %>%
   rename(defin_det_yr=year) %>% 
   select(dat_grp,esutype,code,tagid,stage,mcn_det,lgr_det,event,obssite,defin_det_time,defin_det_yr,mintime) %>%
@@ -221,15 +347,18 @@ defin_detDF <- obs_rel_grps %>%
 
 defin_detDF$defin_half_day_det <- lubridate::floor_date(defin_detDF$defin_det_time,unit = "12 hours")
 
-table(defin_detDF$dat_grp,defin_detDF$obssite)
-data.frame(table(defin_detDF$dat_grp,defin_detDF$obssite))
+# table(defin_detDF$dat_grp,defin_detDF$obssite)
+# data.frame(table(defin_detDF$dat_grp,defin_detDF$obssite))
+# 
+# table(defin_detDF$obssite)
+# 
+# nrow(defin_detDF)
+# table(table(defin_detDF$code))
 
-table(defin_detDF$obssite)
+########################################################### #
 
-nrow(defin_detDF)
-table(table(defin_detDF$code))
 
-saveRDS(obs_rel_grps,"temp/obs_rel_grps.rds")
+
 # adding definitive detection times to data
 obs_rel_grps2 <- obs_rel_grps %>% 
   left_join(defin_detDF %>% 
@@ -242,10 +371,10 @@ obs_rel_grps2$defin_det_yr <- defin_detDF$defin_det_yr[match(obs_rel_grps2$code,
 obs_rel_grps2$det_init <- obs_rel_grps2$defin_det_time_grp==obs_rel_grps2$defin_det_time
 obs_rel_grps2$det_init[is.na(obs_rel_grps2$det_init)]=FALSE
 
+# difference in "days" between the detection time and the definitive detection time identified for that group
 bt=proc.time()
 obs_rel_grps2$det_int_days <- difftime(obs_rel_grps2$mintime,obs_rel_grps2$defin_det_time_grp,units = "days")
 proc.time()-bt
-
 
 # code-level summary
 tagsum2 <- obs_rel_grps2 %>%
@@ -255,9 +384,11 @@ tagsum2 <- obs_rel_grps2 %>%
 
 table(tagsum2$n_defins)
 
+################################################################################ #
+# Reviewing observations without definitive detections
+################################################################################ #
 
 subb <- subset(obs_rel_grps2,code %in% tagsum2[tagsum2$n_defins==0,]$code)
-
 subb_all_good <- subb %>% 
   group_by(stage,dat_grp,esutype,reartype) %>%
   summarize(
@@ -268,9 +399,11 @@ subb_all_good <- subb %>%
     LGR=sum(obssite %in% c("GRS","GRJ")),
     n_dets=length(det_init)) #
 
-subb_all_good %>% filter(stage=="J")
+# viewing the 
 subb_all_good %>% filter(stage!="J")
+subb_all_good %>% filter(stage=="J")
 
+################################################################################ #
 
 table(obs_rel_grps2$dat_grp,obs_rel_grps2$esutype)
 table(subb$dat_grp,subb$esutype)
@@ -288,6 +421,9 @@ barplot(table(tagsum3$n_defins))
 
 tgs_none <- tagsum3$tagid[tagsum3$n_defins==0]
 
+######################## #
+# Defining 'init_det'
+######################## #
 obs_rel_grps2$init_det <- obs_rel_grps2$mintime==obs_rel_grps2$defin_det_time
 table(is.na(obs_rel_grps2$init_det))
 
@@ -295,12 +431,8 @@ table(is.na(obs_rel_grps2$init_det))
 obs_rel_grps2$init_det[is.na(obs_rel_grps2$init_det)]=FALSE
 table(obs_rel_grps2$init_det)
 # head(LGR_DH_matchDF)
-# 1.9 million starting detections
 
-table(table(tagDF_rel_grps$tagid))
-#       1       2       3 
-# 1075116  975316  149009 
-# 1110146 1083828  151194
+
 ################################################### #
 # Differences in days from definitive detection 
 ################################################### #
@@ -322,29 +454,21 @@ text(x=750,y=500000,label="Probable adult detections",col=2)
 
 ################################################### #
 
-
-
 obs_rel_grps2$unassagn <- is.na(as.numeric(obs_rel_grps2$det_int_days))
 table(obs_rel_grps2$unassagn)
 obs_rel_grps_unasg <- obs_rel_grps2[obs_rel_grps2$unassagn,]
-
 table(obs_rel_grps2$unassagn)
 head(obs_rel_grps2)
+nrow(obs_rel_grps2)
 
-obs_rel_grps3 <- subset(obs_rel_grps2,!unassagn & det_int_days >= 0 )
-
-# now 3731384, was 3472775 # total codes 
+# now 3731384, was 3472775 # total codes  
 length(unique(obs_rel_grps2$code))
 # now 3730094, was 3471774 # total codes with a definitive detection assignmet
 length(unique(obs_rel_grps2$code[obs_rel_grps2$det_init]))
 
-
+saveRDS(obs_rel_grps,"comp_files/obs_rel_grps.rds")
+saveRDS(defin_detDF,"comp_files/defin_detDF.rds")
 # before removing negative values relative to the definitive detection
 saveRDS(obs_rel_grps2,"comp_files/obs_rel_grps_2_9825.rds")
-
-# after removing negative values relative to the definitive detection
-saveRDS(obs_rel_grps3,"comp_files/obs_rel_grps_3_9825.rds")
-saveRDS(tagDF_rel_grps,"comp_files/tagDF_rel_grps_9825.rds")
-
 
 
