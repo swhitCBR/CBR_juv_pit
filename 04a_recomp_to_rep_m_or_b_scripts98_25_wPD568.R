@@ -53,28 +53,37 @@ obs_rel_grps4 <- obs_rel_grps3 %>%
   group_by(code)
 
 prim_obssiteDF <-  readRDS("comp_files/int_recov_sites_ls.rds")$"prim_obssiteDF"
-paste(prim_obssiteDF$obssite,collapse="','")
+foc_obssites <-c('GRS','B2J','BCC','GOJ','GRJ','JDJ','LMJ','MCJ','ESX','TWX','PD7','PD6','PD8','PD5','PDO','PDW','ICH','LGRRRR')
 
-foc_obssites <-c('GRS','B2J','BCC','GOJ','GRJ','JDJ','LMJ','MCJ','ESX','TWX','PD7','PD6','PD8','PD5','PDW','ICH',"LGRRRRR"
-                 # unclear how to add these as observations
-                 )
+nrow(obs_rel_grps4)
 
-obs_rel_grps2 %>% filter(tagid=="222F635313")
-tagDF_rel_grps %>% filter(tagid=="222F635313")
 
-# avian recovery
-# 'ASMEBR','ESANIS','MLRSNI','RICEIS','ASMEBR','ESANIS','MLRSNI','RICEIS'
+# failed to include PDO and then noticed that no tagseen at 
+# table(obs_rel_grps4$obssite=="PDO",obs_rel_grps4$obssite %in% c('PD7','PD6','PD8','PD5','PDO','PDW'))
+# table(obs_rel_grps4$obssite=="PDO")
+# table(obs_rel_grps4[obs_rel_grps4$obssite %in% c('PDO','PD7','PD6','PD8','PD5','PDO','PDW'),]$obssite)
 
-# foc_obssites <- c("LGRRRR","B2J","BCC","ESX","GRJ","GRS","MCJ","PD5","PD6","PD7","PD8","TWX")
-# were combining will happen
 
+length(foc_obssites)
+nrow(prim_obssiteDF)
+obs_rel_grps4
+
+##################################################### #
+# obs_rel_grps5 
+##################################################### #
+
+# nrow(obs_rel_grps5)
+# 6304613
 obs_rel_grps5 <- obs_rel_grps4 %>%
   filter(obssite %in% foc_obssites) 
+# all((obs_rel_grps5 %>% filter(obssite=="PDO") %>% pull(tagid)) %in% (obs_rel_grps5 %>% filter(obssite!="PDO") %>% pull(tagid)))
+# nrow(obs_rel_grps5)
 
+
+# converting LGRRRRs to LGR for pooled tags
 obs_rel_grps5$prim_loc_cat[obs_rel_grps5$obssite=="LGRRRR"]="LGR"
 obs_rel_grps5 <- obs_rel_grps5[!(obs_rel_grps5$prim_loc_cat=="LGR" & obs_rel_grps5$dat_grp=="mcn_det"),]
 
-obs_rel_grps5$det_int_days
 obs_rel_grps6 <- obs_rel_grps5 %>%  
   filter(as.numeric(det_int_days)<(365/2)) %>% 
   arrange(dat_grp,esutype,defin_det_yr,code,mintime)
@@ -92,14 +101,10 @@ obssite_summ_tab <- obs_rel_grps6 %>% group_by(dat_grp,esutype,defin_det_yr,code
     n_dets=length(code),
     n_codes=length(unique(code)))
 
-nrow(obssite_summ_tab)
-
-####@@@@@@@@
-# exported to04b
-saveRDS(obs_rel_grps6,"comp_files/obs_rel_grps6.rds")
-####@@@@@@@@
-
-
+# ####@@@@@@@@ too early
+# # exported to04b
+# saveRDS(obs_rel_grps6,"comp_files/obs_rel_grps6.rds")
+# ####@@@@@@@@
 
 ################################################# #
 # simpified to just the general location name
@@ -123,35 +128,39 @@ time_cat <- obs_rel_grps6 %>%
 
 table(time_cat$defin_det_yr)
 
-
 obs_rel_grps6 <- obs_rel_grps6 %>% mutate(grp_code=paste(dat_grp,esutype,reartype,defin_det_yr))
 obs_rel_grps6$before_strt <- obs_rel_grps6$defin_det_time_grp<time_cat$perc1[match(obs_rel_grps6$grp_code,time_cat$grp_code)]
 obs_rel_grps6$after_end <- obs_rel_grps6$defin_det_time_grp>time_cat$perc99[match(obs_rel_grps6$grp_code,time_cat$grp_code)]
 obs_rel_grps6$within <- !(obs_rel_grps6$before_strt | obs_rel_grps6$after_end)
 
 # breakdown of what is excluded
-withn_brkdwn_tab <- obs_rel_grps6 %>% filter(init_det) %>% group_by(dat_grp,esutype,defin_det_yr) %>%
-  summarize(
-    # obs_rel_grps6
-    kept=length(which(within)),
-    total=length(within)) %>% 
-  mutate(excluded=total-kept,
-         retained=kept/total)
+# withn_brkdwn_tab <- obs_rel_grps6 %>% filter(init_det) %>% group_by(dat_grp,esutype,defin_det_yr) %>%
+#   summarize(
+#     kept=length(which(within)),
+#     total=length(within)) %>% 
+#   mutate(excluded=total-kept,
+#          retained=kept/total)
+# saveRDS(withn_brkdwn_tab,"temp/withn_brkdwn_tab.rds")
 
-summary(withn_brkdwn_tab$excluded)
+# summary(withn_brkdwn_tab$excluded)
 # between 6 and 500 tags excluded
 summary(as.numeric(difftime(obs_rel_grps6$mintime[obs_rel_grps6$before_strt],obs_rel_grps6$defin_det_time_grp[obs_rel_grps6$before_strt],units = "days")))
 summary(as.numeric(difftime(obs_rel_grps6$mintime[obs_rel_grps6$after_end],obs_rel_grps6$defin_det_time_grp[obs_rel_grps6$after_end],units = "days")))
 
 # last 1% of tag detections occur up to 2.5 mnths before and  up to 5.5 months after
-
 # difftime(obs_rel_grps6$mintime,obs_rel_grps6$defin_det_time_grp,"days")
 gc()
+
+####@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# exported to04b
+saveRDS(obs_rel_grps6,"comp_files/obs_rel_grps6.rds")
+####@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 # filtering down to only those detections that occured within the middle 99%
 obs_rel_grps7 <- obs_rel_grps6 %>%
   filter(within,init_det) %>%
   mutate(rnd_det_time=lubridate::floor_date(defin_det_time,unit = "12 hours"))
+
 
 time_cat$off_strt=lubridate::floor_date(time_cat$perc1,unit = "12 hours")
 time_cat$off_end=lubridate::floor_date(time_cat$perc99,unit = "12 hours")
@@ -160,17 +169,14 @@ time_cat$off_end=lubridate::floor_date(time_cat$perc99,unit = "12 hours")
 off_used <- time_cat[,c("dat_grp","esutype","defin_det_yr","reartype","grp_code","off_strt","off_end")]
 off_used$tbtw <- difftime(off_used$off_end,off_used$off_strt,"days")
 
-####@@@@@@@@
-# exported to04b
+####@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 saveRDS(obs_rel_grps7,"comp_files/obs_rel_grps7.rds")
-####@@@@@@@@
-
+####@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 gc()
 
 
 # 267 groups
 nrow(off_used)
-
 table(obs_rel_grps7$grp_code %in% off_used$grp_code)
 table( off_used$grp_code %in% obs_rel_grps7$grp_code)
 
@@ -179,21 +185,10 @@ table( off_used$grp_code %in% obs_rel_grps7$grp_code)
 # mcn_det SR_Sock W 2022
 
 off_used <- off_used[off_used$grp_code %in% obs_rel_grps7$grp_code,]
-
 source("R/make_bin_tab.R")
 
 
-# ii=1
-# test <- make_bin_tab(strt=off_used$off_strt[ii],
-#                      end=off_used$off_end[ii],
-#                      interv="month",
-#                      row_data=off_used[ii,c(1:5)])
-# test
-# off_used[112,]
-
-
 # JANKY FOR LOOP THAT HAS TO BE RESTARTED WHEN IT BREAKS
-
 bt=proc.time()
 sub_ls=out_ls=list()
 bin_tab_ls_comb=list()
@@ -249,243 +244,130 @@ for( ii in 1:nrow(off_used)){
 proc.time()-bt # takes ~ 30 seconds
 
 
+
 bt=proc.time()
 bin_tab_ls_combDF <- do.call(rbind,bin_tab_ls_comb)
 obs_rel_grps8 <- do.call(rbind,out_ls) #%>% left_join(bin_tab_ls_combDF %>% select(grp_code,bin_end,partial,ind_bin_hours))
-proc.time()-bt # takes ~ 6.5 min
-
-# obs_rel_grps9$grp_code
-# bin_tab_ls_combDF
-
-head(bin_tab_ls_combDF)
-gc()
-nrow(obs_rel_grps7) #no difference
-nrow(obs_rel_grps8)
+proc.time()-bt # takes ~ 7.5 min
 
 
-# getting rid of duplicates in the definitive detection row
-# obs_rel_grps9 <- obs_rel_grps6[!duplicated(obs_rel_grps6$code2),]
-
-################################################### #
+####@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+saveRDS(obs_rel_grps8,"comp_files/obs_rel_grps8.rds")
+####@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 # for a CJS analysis there shouldn't be duplicate detections
 # at the same site. This code eliminates all the second detection events
 # at the primary locations
 
 obs_rel_grps9 <- obs_rel_grps6 %>%
-  filter(within) %>%
-  mutate(rnd_det_time=lubridate::floor_date(defin_det_time,unit = "12 hours"))
-
-head(obs_rel_grps9$code2)
-table(table(obs_rel_grps9$code2))
-#       1       2       3 
-# 4927327     244       2 
+  # filter(within) %>%
+  mutate(rnd_det_time=lubridate::floor_date(defin_det_time,unit = "12 hours"),
+         dup_obs=duplicated(code2))
 
 
-dup_tagid <- unique(obs_rel_grps9$tagid[duplicated(obs_rel_grps9$code2)])
-
-# data.frame(obs_rel_grps9 %>% filter(tagid %in% dup_tagid[1]))
-data.frame(obs_rel_grps9 %>% filter(tagid %in% dup_tagid[1]) %>% 
-             select(esutype,reartype,prim_loc_cat,obssite,mintime))
-
-data.frame(obs_rel_grps9 %>% filter(dat_grp=="lgr_pooled" & tagid %in% dup_tagid[2]) %>% 
-             select(esutype,reartype,prim_loc_cat,obssite,mintime))
-
-# head(obs_rel_grps9)
-
-# precocious fish?
-# length(dup_tagid)
-
-tagDF_rel_grps %>% filter(tagid %in% dup_tagid ) %>% 
-  select(esutype,reartype,tagid) %>% 
-  group_by(esutype,reartype) %>% 
-  summarize(ntags=length(unique(tagid))) 
+# could include duplicates
+saveRDS(obs_rel_grps9,"comp_files/obs_rel_grps9.rds")
 
 
 
+################################################## #
+
+# source("C:/repos/repo_simCJS/simCJS/R/per2_surph_ests.R")
+# within_tgs_tb <- obs_rel_grps6 %>% group_by(dat_grp,esutype,tagid) %>% summarize(within=any(within))
+
+# tagDF_rel_grps %>% filter(tagid %in% dup_tagid ) %>% 
+#   select(esutype,reartype,tagid) %>% 
+#   group_by(esutype,reartype) %>% 
+#   summarize(ntags=length(unique(tagid))) 
+# 
 # obs_rel_grps9 %>% filter(tagid %in% obs_rel_grps9[duplicated(obs_rel_grps9$code2),]$tagid)
-obs_rel_grps9 <- obs_rel_grps9[!duplicated(obs_rel_grps9$code2),]
-
-
-
-# nrow(obs_rel_grps9)
-
-# nrow(obs_rel_grps9)
-# 3920377-3920251 #126 duplicates
-# obs_rel_grps9 <- obs_rel_grps6[!duplicated(obs_rel_grps6$code2),]
+# obs_rel_grps9 <- obs_rel_grps9[!duplicated(obs_rel_grps9$code2),]
 # 
-# names(obs_rel_grps9)
-# obs_rel_grps9$defin_det_time
-# obs_rel_grps9$mintime
-# 
-# obs_rel_grps9 %>% select(code,defin_det_yr,defin_det_time,defin_det_time_grp,mintime)
-# obs_rel_grps8 %>% select(code,defin_det_yr,defin_det_time,defin_det_time_grp,mintime)
-# 
-# are there any codes in 9 that are not in 8
-# sapply(obs_rel_grps9$code,function(x) x %in% obs_rel_grps8$code)
-# 
-# trying to get bin assignments from 8 onto 9
- # <- readRDS("temp/tagDF_rel_grps_9825.rds")
-
-################################## #
-# adding detection history labels
-################################## #
-
-obs_rel_grps9
-# rel_recov_tgs <- tagDF_rel_grpsNEWER_filt %>% filter(AVIAN_recov) %>% pull(tagid)
-rel_recov_tgs <- tagDF_rel_grps %>% filter(AVIAN_recov) %>% pull(tagid)
-
-# tags remaining after obs fiiltering
-tagDF_rel_9 <- tagDF_rel_grps %>% filter(tagid %in% unique(obs_rel_grps9$tagid))
-head(tagDF_rel_9)
-# nrow(tagDF_rel_9)
-
-# saveRDS(tagDF_rel_9,"temp/tagDF_rel_9.rds")
-
-
-
-dh_tab <- obs_rel_grps9 %>% 
-  group_by(dat_grp,esutype,reartype,defin_det_yr,defin_det_time_grp,grp_code,code,tagid) %>%
-  summarize(DH_label=paste(prim_loc_cat,collapse=" -> ")) %>%
-  mutate(avian_rec=tagid %in% c(rel_recov_tgs))
-
-gc()
- # <- tagid 
 ################################## #
 # adding avian recoveries
 ################################## #
 
-dh_subb <- dh_tab[dh_tab$tagid %in% rel_recov_tgs,]
+# rel_recov_tgs <- tagDF_rel_grps %>% filter(AVIAN_recov) %>% pull(tagid)
 
-unique(substr(x=dh_tab$DH_label,(nchar(dh_tab$DH_label)-9),nchar(dh_tab$DH_label)))
-table(substr(x=dh_tab$DH_label,(nchar(dh_tab$DH_label)-9),nchar(dh_tab$DH_label))=="-> Estuary")
-
-# avian_rec <- tagid %in% c(rel_recov_tgs)
-dh_tab$avian_rec <- dh_tab$tagid %in% c(rel_recov_tgs)
-
-dh_tab$no_estu_end=substr(x=dh_tab$DH_label,(nchar(dh_tab$DH_label)-9),nchar(dh_tab$DH_label))!="-> Estuary"
-dh_tab$av_recov=dh_tab$no_estu_end & dh_tab$avian_rec
-dh_tab$DH_label_mod=ifelse(dh_tab$av_recov," -> Estuary",dh_tab$DH_label)
-
-# dh_tab<- dh_tab %>% mutate(
-#   no_estu_end=substr(x=DH_label,(nchar(DH_label)-9),nchar(DH_label))!="-> Estuary",
-#   av_recov=dh_tab$no_estu_end & dh_tab$avian_rec)#,#,paste0(dh_tab$DH_label," -> Estuary"),dh_tab$DH_label)
-# dh_tab$DH_label_mod=ifelse(dh_tab$av_recov," -> Estuary",dh_tab$DH_label)
+################################################## #
+# subsetting tags based on those retained here
+################################################## #
 # 
-head(dh_tab)
-
-dh_tab %>% ungroup() %>% select(dat_grp,esutype,reartype,defin_det_yr,defin_det_time_grp,DH_label_mod) %>% filter(dat_grp=="lgr_det")
-
-# dh_tab %>% ungroup() %>% select(dat_grp,esutype,reartype,defin_det_yr,defin_det_time_grp,DH_label,DH_label_mod) %>% filter(dat_grp=="lgr_det")
-# head(dh_tab)
-# View(dh_tab[dh_tab$DH_label_mod!=dh_tab$DH_label,])
-# look for transition patterns that should be omitted because they are probably adults 
-# manually replace as neccessary
-table(dh_tab$DH_label) 
-
-# pre-loaded tables describing detection histories for 2 locations
-# head(LGR_DH_matchDF)
-# head(MCN_DH_matchDF)
-
-source("R/LGR_DH_match & MCN_DH_match.R")
-
-# dh_tab_2
-
-dh_tab <- dh_tab %>% mutate(DH_label_orig=DH_label,DH_label=DH_label_mod)
-
-str(dh_tab)
-
-bt=proc.time()
-lgr_dh_tab <- dh_tab %>% filter(dat_grp %in% c("lgr_det","lgr_pooled")) %>% left_join(LGR_DH_matchDF)
-proc.time()-bt # takes ~ 6.5 mins
-
-bt=proc.time()
-mcn_dh_tab <- dh_tab %>% filter(dat_grp=="mcn_det") %>% left_join(MCN_DH_matchDF)
-proc.time()-bt # takes ~ 6.5 mins
-
-# bt=proc.time()
-# lgr_dh_tab <- dh_tab %>% filter(dat_grp %in% c("lgr_det","lgr_pooled")) %>% left_join(LGR_DH_matchDF)
-# mcn_dh_tab <- dh_tab %>% filter(dat_grp=="mcn_det") %>% left_join(MCN_DH_matchDF)
-# proc.time()-bt # takes ~ 6.5 mins
-
-head(data.frame(lgr_dh_tab))
-lgr_dh_tab %>% filter(esutype=="SR_Ch1" & reartype=W) %>% group_by(rel_year,)
-
-
-################################################### #
-# nas removed because dh_tab and obs_rel_grps9 have all the rows and 
-# obs_rel_grps8 is filtered to only within init_det
-# but obs_rel_grps8 has temporal bin assignments
-
-
-# identifying codes(grp_code + tagid) in obs_rel_grps9 that 
-mtc1 <- match(lgr_dh_tab$code,obs_rel_grps8$code)
-mtc2 <- match(mcn_dh_tab$code,obs_rel_grps8$code)
-table(is.na(mtc1)) # there are some nas
-table(is.na(mtc2))
-
-
-# why are there thousands of unmatched definitive detections for obs_rel8?
-table(!lgr_dh_tab$code %in% obs_rel_grps8$code)
-lgr_dh_tab[!lgr_dh_tab$code %in% obs_rel_grps8$code,]
-
-
-
-
-head(obs_rel_grps8)
-bt=proc.time()
-
-lgr_dh_tab2 <- data.frame(lgr_dh_tab[!is.na(mtc1),],obs_rel_grps8[mtc1[!is.na(mtc1)],c("relsite","day","days3.5","week1","weeks2","month")])
-mcn_dh_tab2 <- data.frame(mcn_dh_tab[!is.na(mtc2),],obs_rel_grps8[mtc2[!is.na(mtc2)],c("relsite","day","days3.5","week1","weeks2","month")])
-
-lgr_dh_tab2$virt_det <- lgr_dh_tab2$relsite=="LGRRRR"
-mcn_dh_tab2$virt_det <- mcn_dh_tab2$relsite=="LGRRRR"
-
-proc.time()-bt # takes ~ 6.5 mins
-
-# lgr_dh_tab2
-# mcn_dh_tab2
-gc()
-
-nrow(bin_tab_ls_combDF)
-nrow(bin_tab_ls_combDF %>% filter(bin=="day" & binID %in% 1:(length(unique(bin_tab_ls_combDF$defin_det_yr)))))
-# 15*
-
-yr_binsDF <- bin_tab_ls_combDF %>% 
-  group_by(dat_grp,esutype,defin_det_yr,reartype,grp_code,official_strt,official_end) %>%
-  summarize(bins_in_grp=length(binID),
-            subyear_bin_types=length(unique(bin))) %>%
-  mutate(binID=as.numeric(defin_det_yr)-min(as.numeric(bin_tab_ls_combDF$defin_det_yr))+1,
-         bin="year",
-         bin_strt=official_strt,
-         bin_end=official_end,
-         partial=FALSE,
-         ind_bin_hours=as.numeric(difftime(official_end,official_strt,units = "hours")),
-         full_bin_hours=ind_bin_hours,
-         ind_bin_days=ind_bin_hours/24
-  )
-
-bin_tab_ls_combDFwYR <- bind_rows(bin_tab_ls_combDF,yr_binsDF) %>% 
-  select(-bins_in_grp,-subyear_bin_types) %>% 
-  select(-binID.1,-bin.1,-grp_code.1)
-
-# last 267 rows are years
-bin_tab_ls_combDFwYR$unq_binID <- 1:nrow(bin_tab_ls_combDFwYR)
-
-
-mcn_dh_tab2
-
+# # tags remaining after obs fiiltering
+# tagDF_rel_9 <- tagDF_rel_grps %>% filter(tagid %in% unique(obs_rel_grps9$tagid))
 # 
-# saveRDS(obs_rel_grps9,"comp_files/obs_rel_grps9_9825_wPD568.rds")
-# saveRDS(obs_rel_grps8,"comp_files/obs_rel_grps8_9825_wPD568.rds")
+# head(tagDF_rel_9)
+# # nrow(tagDF_rel_9)
 # 
+# # could include duplicates
+# saveRDS(tagDF_rel_9,"comp_files/tagDF_rel_9.rds") 
 # 
-# 
-# saveRDS(lgr_dh_tab2,"comp_files/lgr_dh_tab2_9825_wPD568.rds")
-# saveRDS(mcn_dh_tab2,"comp_files/mcn_dh_tab2_9825_wPD568.rds")
-# # saveRDS(DF,"temp/diff_time_frst_to_99p_9823_wPD568.rds")
-# saveRDS(bin_tab_ls_combDF,"temp/bin_tab_ls_combDF.rds")
+################################## #
+# mcn_obs_rel_forDH <- mcn_obs_rel %>% filter(!dup_obs)
+# lgr_obs_rel_forDH <-  lgr_obs_rel_wdups %>% filter(!dup_obs)
 
-saveRDS(bin_tab_ls_combDFwYR,"comp_files/bin_tab_ls_combDFwYR_9825_wPD568.rds")
+# within the 99th percentile for the definitive detection event
+table(obs_rel_grps9$within)
 
-# save.image("comp_files/04a_comp_env_20gb.Rdata")
+# subsetting MCN det data
+# mcn_obs_rel <- obs_rel_grps9 %>% 
+#   filter(dat_grp=="mcn_det" & prim_loc_cat %in% c("MCN","BON","JDA","Estuary")) %>%
+#   mutate(dup_obs=duplicated(code2))
+
+################################ #
+# Detection history
+################################ #
+# lgr_obs_rel_forDH <- lgr_obs_rel_forDH %>% left_join(within_tgs_tb %>% select(dat_grp,esutype,tagid,within))
+
+
+# subsetting MCN det data
+mcn_obs_rel_wdups <- obs_rel_grps9 %>% 
+  filter(dat_grp=="mcn_det" & !(prim_loc_cat %in% c("LGR","LMN","LGS","ICH"))) %>%
+  # filter(dat_grp=="mcn_det" & prim_loc_cat %in% c("MCN","BON","JDA","Estuary")) %>%
+  # filter(dat_grp=="mcn_det" & prim_loc_cat %in% c("MCN","BON","JDA","Estuary")) %>%
+  mutate(dup_obs=duplicated(code2))
+
+lgr_obs_rel_wdups <- obs_rel_grps9 %>%
+  filter(dat_grp %in% c("lgr_pooled","lgr_det")) %>%
+  mutate(dup_obs=duplicated(code2))
+
+######################################## #
+#  Exports
+######################################## #
+
+mcn_obs_rel_forDH <-  mcn_obs_rel_wdups %>%
+  filter(!dup_obs) %>% 
+  left_join(tagDF_rel_grps %>% select(tagid,AVIAN_recov)) %>%
+  left_join(obs_rel_grps8 %>% select(dat_grp,esutype,reartype,tagid,day,days3.5,week1,weeks2,month))
+
+# mcn_obs_rel_forDH_tmp <- mcn_obs_rel_forDH %>% left_join(obs_rel_grps8 %>% select(dat_grp,esutype,reartype,tagid,day,days3.5,week1,weeks2,month))
+  
+lgr_obs_rel_forDH <- lgr_obs_rel_wdups %>% 
+  filter(!dup_obs) %>% 
+  left_join(tagDF_rel_grps %>% select(tagid,AVIAN_recov)) %>%
+  left_join(obs_rel_grps8 %>% select(dat_grp,esutype,reartype,tagid,day,days3.5,week1,weeks2,month))
+
+
+saveRDS(mcn_obs_rel_forDH,"comp_files/mcn_obs_rel_forDH.rds")
+saveRDS(lgr_obs_rel_forDH,"comp_files/lgr_obs_rel_forDH.rds")
+
+############################################### #
+################ START FOOTER ################# #
+############################################### #
+
+bin_tab_ls_combDF$bin_code_tmp <- paste(bin_tab_ls_combDF$defin_det_yr,bin_tab_ls_combDF$binID,bin_tab_ls_combDF$bin.1)
+table(table(bin_tab_ls_combDF$bin_code_tmp))
+bin_tab_ls_combDF$unq_binID
+
+mtchind <- mcn_obs_rel_forDH$day_mtch_code=paste(mcn_obs_rel_forDH$defin_det_yr,mcn_obs_rel_forDH$day,"day")
+
+# table(table(day_mtch_code))
+
+mtchind <- match(tail(mcn_obs_rel_forDH$day_mtch_code),bin_tab_ls_combDF$bin_code_tmp)
+bin_tab_ls_combDF[mtchind,]
+
+tail(data.frame(mcn_obs_rel_forDH))
+
+head(mcn_obs_rel_forDH)
+match(paste(mcn_obs_rel_forDH$defin_det_yr,mcn_obs_rel_forDH$day,"day"),bin_tab_ls_combDF$bin_code_tmp)
+table(mcn_obs_rel_forDH$dat_grp)

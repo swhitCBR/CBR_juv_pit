@@ -15,23 +15,11 @@ subb_6_dh <-  obs_rel_grps6 %>%
   summarize(DH_label=paste(prim_loc_cat,collapse=" -> "))
 
 
-
-
-
 # dh_tab <- obs_rel_grps9 %>% 
 #   group_by(dat_grp,esutype,reartype,defin_det_yr,defin_det_time_grp,grp_code,code) %>%
 #   summarize(DH_label=paste(prim_loc_cat,collapse=" -> "))
-
-
-
-
-
-
-
-
 # 
 # obs_rel_grps7 <- readRDS("temp/obs_rel_grps7.rds")
-# 
 # > nrow(obs_rel_grps2 )
 # [1] 6894635
 # > length(unique(obs_rel_grps2$tagid))
