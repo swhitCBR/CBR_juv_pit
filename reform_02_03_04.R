@@ -1,4 +1,7 @@
 
+# I should be able to look up all the tagged fish that contribute to an estimate in a row count
+
+
 
 raw_DF <- readRDS("comp_files/DART_ALL_SR_ESU_DPS_rec_ls.rds")$"raw_DF"
 tagDF <- readRDS("comp_files/DART_ALL_SR_ESU_DPS_rec_ls.rds")$"tagDF"
@@ -66,18 +69,48 @@ table(tags_comb_raw$hist_type_mod)
 barplot(table(tags_comb_raw$hist_type_mod))
 # 66025/(66025+5527075) # slightly more than 1% of fish are ever seen again at avian colonies
 
-
-
 # more that 1/2 of released ESU/DPS fish that are released are not detected as juveniles
-
 
 head(tags_comb_raw)
 head(tags_comb_raw[!is.na(tags_comb_raw$recovsite),])
 
 
-# AV_recov_relyr9625_DF %>% filter(tagid %in% AV_recov_relyr9625_DF$tagid[duplicated(AV_recov_relyr9625_DF$tagid)][1])
-# tags_comb_raw$tagid
+# SCRAP 1
+# 
+# # loading in comb tags and obs
+# 
+# obs_comb <- readRDS("temp/tags_and_obs_comb_ls9825.rds")$"obs_comb"
+# tags_comb <- readRDS("temp/tags_and_obs_comb_ls9825.rds")$"tags_comb"
+# 
+# table(obs_comb$relbasin)
+# 
+# # source("02c_load_spat_dat.R")
+# head(tags_comb_raw)
+# 
+# table(obs_comb$event)
 
 
 
-# (gc())
+# SCRAP 2
+# obs_rel_grps %>% 
+#   filter(esutype=="SR_Ch1" & 
+#            year==2013 & #
+#            prim_loc_cat =="LGR" & 
+#            lgr_det) %>% 
+#   group_by(reartype) %>% 
+#   summarize(ntags=length(unique(tagid)))
+# 
+# 
+# table(obs_rel_grps$year,obs_rel_grps$relsite =="LGRRRR")
+# 
+# obs_rel_grps %>% 
+#   filter(esutype=="SR_Ch1" & 
+#            year==2013 & #
+#            prim_loc_cat =="LGR" & 
+#            # lgr_det &
+#            relsite =="LGRRRR") %>% 
+#   group_by(reartype) %>% 
+#   summarize(ntags=length(unique(tagid)))
+# 
+# 
+# 8769+5740

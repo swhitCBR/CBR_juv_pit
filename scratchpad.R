@@ -4,16 +4,23 @@ headDF <- function(x){head(data.frame(x))}
 # saveRDS(list("tags_comb_raw"=tags_comb_raw,"obs_comb_raw"=obs_comb_raw),
 #         "temp/tags_and_obs_comb_raw_ls9825.rds")
 
-
 tags_comb_raw <- (readRDS("temp/tags_and_obs_comb_raw_ls9825.rds"))$"tags_comb_raw"
 obs_comb_raw <- (readRDS("temp/tags_and_obs_comb_raw_ls9825.rds"))$"obs_comb_raw"
 
-# table of fish released from 1996-2025
+table(obs_comb_raw$reartype)
+# function for summarizing raw releases by esutype,rear type, and release year
+# - includes transported fish 
+
 source("C:/repos/CBR_juv_pit/R/get_raw_release_tab.R")
 my_rel_tb <- get_raw_release_tab(tags_comb_raw_in = tags_comb_raw)
 
 # table(is.na(tags_comb_raw$min_estMigry))
 head(tags_comb_raw$min_estMigry)
+
+
+######################################################################## #
+# Looking at estimated migration year based on MCN or LGR detection
+######################################################################## #
 
 # tags_comb_raw %>% group_by(esutype,reartype,) %>% min_estMigry
 # 165 not the same
@@ -29,21 +36,17 @@ table(tags_comb_raw %>% filter(!is.na(estMigyrLGR) & !is.na(estMigyrMCN)) %>% mu
 head(tags_comb_raw)
 
 table(is.na(tags_comb_raw$min_estMigry))
-# table(is.na(tags_comb_raw$estMigyrLGR))
-# table(is.na(tags_comb_raw$estMigyrMCN))
 
-tags_comb_raw$min_estMigry <- NULL
 
-library(dplyr) 
-subb_tb1 <- tags_comb_raw %>% 
-  filter(!is.na(estMigyrLGR) | !is.na(estMigyrMCN)) # %>%
+######################################################################################### #
+# Looking at estimated release year versus migration year based on MCN or LGR detection
+######################################################################################### #
 
-subb_tb1$min_estMigry <- sapply(1:nrow(offset_relmigr_subb),function(ii) {
-  min(offset_relmigr_subb$estMigyrMCN[ii],
-      offset_relmigr_subb$estMigyrLGR[ii],na.rm=T)})
-
+library(ggplot2)
+# long-form raw release data
 my_rel_tb_l <- get_raw_release_tab(tags_comb_raw_in = tags_comb_raw,long=T)
 
+# summary of migration years (includes transported fish)
 subb_tb2 <- subb_tb1 %>% 
   mutate(yr_diff=paste0("y_",min_estMigry-rel_year)) %>%
   group_by(esutype,reartype,rel_year,yr_diff) %>%
@@ -51,13 +54,23 @@ subb_tb2 <- subb_tb1 %>%
   tidyr::pivot_wider(values_from = ntags,names_from=yr_diff) %>% 
   left_join(my_rel_tb_l) %>% 
   relocate(esutype,reartype,rel_year,ntags) #%>% 
-  # mutate(P_seen=y_0/sum(y_0,y_1,y_2,na.rm=T),
-  #        P_y0_cond=y_0/sum(y_0,y_1,y_2,na.rm=T),
-  #        P_y1_cond=y_1/sum(y_0,y_1,y_2,na.rm=T),
-  #        P_y2_cond=y_2/sum(y_0,y_1,y_2,na.rm=T))
-  
-# subb_tb2$P_seen <- 
-  
+
+rel_det_delayDF <- data.frame(offset_relmigr_subb[,1:3],yr_plus0,yr_plus1,yr_plus2) %>% left_join(my_rel_tb_l) %>% relocate(esutype,reartype,rel_year,ntags)
+rel_det_delayDF <- rel_det_delayDF %>% mutate(P_seen=(yr_plus0+yr_plus1+yr_plus2)/ntags,
+                                              P_plus0=yr_plus0/(yr_plus0+yr_plus1+yr_plus2),
+                                              P_plus1=yr_plus1/(yr_plus0+yr_plus1+yr_plus2),
+                                              P_plus2=yr_plus2/(yr_plus0+yr_plus1+yr_plus2))
+
+rel_det_delayDF_plt <- rel_det_delayDF %>%  select(esutype,reartype,rel_year,ntags,P_seen)
+ggplot2::ggplot(data=rel_det_delayDF_plt,aes(y=P_seen,x=rel_year,color=reartype)) + facet_grid(reartype~esutype,scales="free_y") + 
+  # geom_line() + 
+  geom_point() + scale_x_continuous(limits=c(2002,2025))
+
+# release year plot
+ggplot2::ggplot(data=rel_det_delayDF_plt,aes(y=ntags,x=rel_year,color=reartype)) + facet_grid(esutype~reartype,scales="free_y") + 
+  geom_bar(stat="identity") + scale_x_continuous(limits=c(2002,2025))
+
+# matrix of proportions of tagged fish "seen" again in year of release (y=0) also y=1 and y=2
 t(sapply(1:nrow(subb_tb2),function(ii) {
   c(subb_tb2$y_0[ii]/sum(c(subb_tb2$y_0[ii],subb_tb2$y_1[ii],subb_tb2$y_2[ii]),na.rm=T),
     subb_tb2$y_1[ii]/sum(c(subb_tb2$y_0[ii],subb_tb2$y_1[ii],subb_tb2$y_2[ii]),na.rm=T),
@@ -68,17 +81,27 @@ t(sapply(1:nrow(subb_tb2),function(ii) {
 
 
 
-head(data.frame(subb_tb2))
 
-  # mutate(P_seen=(y_0+y_1+y_2)/ntags)
-#,
-         P_plus0=y_0/(y_0+y_1+y_2),
-         P_plus1=y_1/(y_0+y_1+y_2),
-         P_plus2=y_1/(y_0+y_1+y_2))
-  
 
-subb_tb2$y_0/subb_tb2$ntags
-head(subb_tb2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 
+# 
+# subb_tb2$y_0/subb_tb2$ntags
+# head(subb_tb2)
 
 
 
@@ -112,28 +135,6 @@ yr_plus2=rowSums(offset_relmigr_subb[,match(c("2 2","2 NA","NA 2",
                                               "3 2")
                                             ,names(offset_relmigr_subb) )],na.rm = T)
 
-
-
-
-rel_det_delayDF <- data.frame(offset_relmigr_subb[,1:3],yr_plus0,yr_plus1,yr_plus2) %>% left_join(my_rel_tb_l) %>% relocate(esutype,reartype,rel_year,ntags)
-
-rel_det_delayDF <- rel_det_delayDF %>% mutate(P_seen=(yr_plus0+yr_plus1+yr_plus2)/ntags,
-                           P_plus0=yr_plus0/(yr_plus0+yr_plus1+yr_plus2),
-                           P_plus1=yr_plus1/(yr_plus0+yr_plus1+yr_plus2),
-                           P_plus2=yr_plus2/(yr_plus0+yr_plus1+yr_plus2))
-
-
-rel_det_delayDF_plt <- rel_det_delayDF %>%  select(esutype,reartype,rel_year,ntags,P_seen)
-
-library(ggplot2)
-ggplot2::ggplot(data=rel_det_delayDF_plt,aes(y=P_seen,x=rel_year,color=reartype)) + facet_grid(reartype~esutype,scales="free_y") + 
-  # geom_line() + 
-  geom_point() + scale_x_continuous(limits=c(2002,2025))
-
-
-# release year plot
-ggplot2::ggplot(data=rel_det_delayDF_plt,aes(y=ntags,x=rel_year,color=reartype)) + facet_grid(esutype~reartype,scales="free_y") + 
-  geom_bar(stat="identity") + scale_x_continuous(limits=c(2002,2025))
 
 
 
