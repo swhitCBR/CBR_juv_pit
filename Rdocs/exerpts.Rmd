@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 exerpts <- readRDS("tag_rel_exerpts_ls.rds")
-sprintf()
+# sprintf()
 
 exerpts$tot_rel_all <- paste(signif(exerpts$tot_rel_all/1000000,1),"million")
 
@@ -24,21 +24,17 @@ exerpts$unfilt_rel_tgs_W_prop_v <- signif(exerpts$unfilt_rel_tgs_W_prop_v,2)
 
 ```
 
-Approximately `r exerpts$tot_rel_all`  tags were released upstream of Lower Granite Dam in the Snake River Basin between 1996 and 2025, including `r exerpts$unfilt_rel_tgs_rtcomb_v["SR_Ch1"]` yearling Chinook Salmon, `r exerpts$unfilt_rel_tgs_rtcomb_v["SR_Sthd"]` Steelhead, and `r exerpts$unfilt_rel_tgs_rtcomb_v["SR_Sock"]` Sockeye Salmon.  More hatchery-origin fish were released overall, but the composition of tags varied considerably across populations and over time. The proportion of wild-origin fish was `r exerpts$unfilt_rel_tgs_W_prop_v["SR_Ch1"]` for Chinook Salmon, `r exerpts$unfilt_rel_tgs_W_prop_v["SR_Sthd"]` for Steelhead, and only `r exerpts$unfilt_rel_tgs_W_prop_v["SR_Sock"]` for Sockeye Salmon.
+#Results
 
-The proportion of tags detected at a downstream antenna during the same calendar year as their release was XXX. XXX % of tags were detected at one of these antennas in the year following calendar year, while detection at one of these antennas two years after release was relatively rare. 
+## Summary of overall counts
 
-<!-- following release varied by population.  -->
-<!-- In most cases, fish outmigrated during the same year that they were released the year of release corresponded, based on fish with a record of detection following release. -->
+Approximately `r exerpts$tot_rel_all`  tags were released upstream of Lower Granite Dam in the Snake River Basin between 1996 and 2025, including `r exerpts$unfilt_rel_tgs_rtcomb_v["SR_Ch1"]` yearling Chinook Salmon, `r exerpts$unfilt_rel_tgs_rtcomb_v["SR_Sthd"]` Steelhead, and `r exerpts$unfilt_rel_tgs_rtcomb_v["SR_Sock"]` Sockeye Salmon.  More hatchery-origin fish were released overall, but the composition of tags varied considerably across populations and over time. The proportion of wild-origin fish was `r exerpts$unfilt_rel_tgs_W_prop_v["SR_Ch1"]` for Chinook Salmon, `r exerpts$unfilt_rel_tgs_W_prop_v["SR_Sthd"]` for Steelhead, and only `r exerpts$unfilt_rel_tgs_W_prop_v["SR_Sock"]` for Sockeye Salmon. An additional XXX and XXX wild-origin fish Chinook Salmon and Steelhead were tagged and released at Lower Granite Dam during this same period, and when these fish were included in the the tabulation, the proportion of wild-orgin Chinook Salmon and Steelhead increased by XXX and XX, respectively. 
 
-<!-- Notably, releases at LGRRRR directly affect the ability to estimate survival within that particular year -->
+## Summary of annual conditions
 
+# For supplement
 
-
-
-An additional XXX and XXX wild-origin fish Chinook Salmon and Steelhead were tagged and released at Lower Granite Dam during this same period. 
-
-When these fish are included in the tabulation, the total number of wild-orgin Snake River Chinook Salmon and Steelhead tags increases by XXX times, and the overall proportion of wild tags increases to XX and XX, for each population respectively. 
+The proportion of tags detected at a downstream antenna during the same calendar year as their release was XXX. XXX % of tags were detected at one of these antennas in the year following calendar year, detection at one of these antennas beyond one year was rare (<1% for all populations). 
 
 
 
