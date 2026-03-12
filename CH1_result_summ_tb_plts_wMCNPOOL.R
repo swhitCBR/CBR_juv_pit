@@ -8,7 +8,7 @@ source("C:/repos/repo_simCJS/simCJS/R/get_est_tab.R")
 # CH1_res_exrt_ls <- list()
 
 # exclusive look at SR_CH1 det
-lgr_bin_brkDF <- readRDS("comp_files/lgr_bin_brkDF")
+lgr_bin_brkDF <- readRDS("comp_files/lgr_bin_brkDF_wMCNPOOL.rds")
 lgr_dh_tab_year <- lgr_bin_brkDF %>% filter(dat_grp=="lgr_det" & esutype=="SR_Ch1" & binsize=="year")
 
 

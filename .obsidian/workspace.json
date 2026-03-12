@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "ToDos.md",
+                "file": "Rdocs/Results mad-lib.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "ToDos"
+              "title": "Results mad-lib"
             }
           },
           {
@@ -64,17 +64,17 @@
             }
           },
           {
-            "id": "ff95b57d6a2a4f3f",
+            "id": "67498f5966ba1184",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Rdocs/Results mad-lib.md",
+                "file": "Untitled 1.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Results mad-lib"
+              "title": "Untitled 1"
             }
           }
         ],
@@ -241,38 +241,41 @@
       "bases:Create new base": false
     }
   },
-  "active": "ff95b57d6a2a4f3f",
+  "active": "67498f5966ba1184",
   "lastOpenFiles": [
-    "Widener et al. 2024 tables.md",
-    "Rdocs/Results mad-lib.md",
-    "Rdocs/exerpts.knit.md",
-    "Widener et al. 2025 tables.R",
-    "Widener et al. 2022 tables.R",
-    "Pasted image 20260308163526.png",
-    "Pasted image 20260308163500.png",
-    "Pasted image 20260308163449.png",
-    "Pasted image 20260308163438.png",
-    "Pasted image 20260308163429.png",
-    "Pasted image 20260308163416.png",
-    "Pasted image 20260308163324.png",
-    "Pasted image 20260308163310.png",
-    "Pasted image 20260308163259.png",
-    "Pasted image 20260308163231.png",
+    "CH1_result_summ_tb_plts_wMCNPOOL.R",
+    "06 DH bin breakdown tb comp_wMCNPOOL.R",
+    "Untitled 1.md",
     "scratch.md",
+    "Rdocs/Results mad-lib.md",
+    "comp_files/mcn_bin_brkDF_wMCNPOOL.rds",
+    "comp_files/lgr_bin_brkDF_wMCNPOOL.rds",
+    "comp_files/lgr_dh_tab_wMCNPOOL.rds",
+    "05_DH_formation_from_obs_rel_grps_and_add_includ_col_to_orig_rel_tag_tb_wMCNPOOL.R",
+    "comp_files/mcn_dh_tab_wMCNPOOL.rds",
+    "comp_files/tags_comb_inclu_9825_wMCNPOOL.rds",
+    "comp_files/obs_rel_grps10_wMCNPOOL.rds",
+    "comp_files/obs_rel_grps9_wMCNPOOL.rds",
+    "comp_files/obs_rel_grps8_wMCNPOOL.rds",
     "ToDos.md",
-    "comp_files/obs_rel_grps7.rds",
-    "comp_files/obs_rel_grps6.rds",
-    "comp_files/tags_and_obs_comb_ls9825.rds",
-    "comp_files/tags_and_obs_comb_raw_ls9825.rds",
-    "r_investigate_descrep_tmp.R",
-    "temp/old/tags_and_obs_comb_raw_ls9825.rds",
-    "temp/old/tags_and_obs_comb_ls9825.rds",
-    "temp/old/obs_rel_grps.rds",
+    "Spill Category.md",
+    "Equations.md",
+    "Rdocs/exerpts.knit.md",
+    "attachments/Pasted image 20260308162800.png",
+    "Widener et al. 2024 tables.md",
+    "attachments/Pasted image 20260308163526.png",
+    "attachments/Pasted image 20260308163500.png",
+    "attachments/Pasted image 20260308163449.png",
+    "attachments/Pasted image 20260308163438.png",
+    "attachments/Pasted image 20260308163429.png",
+    "attachments/Pasted image 20260308163416.png",
+    "attachments/Pasted image 20260308163324.png",
+    "attachments/Pasted image 20260308163310.png",
+    "attachments/Pasted image 20260308163259.png",
     "key ref notes/Mulitmodality refs.md",
     "Diagrams/sankey getting there.md",
     "Diagrams/Mermaid chart code for Lebreton et al. (1992) table 3.md",
     "Diagrams/Diagrams.md",
-    "Equations.md",
     "sankey getting there.md",
     "Mermaid chart code for Lebreton et al. (1992) table 3.md",
     "Diagrams.md",
@@ -285,9 +288,6 @@
     "Lebreton et al. 1992.md",
     "Kendall and Nichols 2002.md",
     "Burnham et al. 1987.md",
-    "Untitled.md",
-    "sheather and Jones and unbiased cross-validation bandwidth selector.md",
-    "Spill Category.md",
-    "mermaid_diagrams.md"
+    "Untitled.md"
   ]
 }

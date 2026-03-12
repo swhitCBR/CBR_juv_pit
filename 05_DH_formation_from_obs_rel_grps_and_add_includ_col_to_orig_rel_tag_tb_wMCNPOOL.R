@@ -2,10 +2,10 @@
 library(dplyr)
 
 
-obs_rel_grps10 <- readRDS("comp_files/obs_rel_grps10.rds")
+obs_rel_grps10 <- readRDS("comp_files/obs_rel_grps10_wMCNPOOL.rds")
 
 table(obs_rel_grps10$AVIAN_recov)
-obs_rel_grps8 <- readRDS("comp_files/obs_rel_grps8.rds")
+obs_rel_grps8 <- readRDS("comp_files/obs_rel_grps8_wMCNPOOL.rds")
 table(obs_rel_grps10$dup_obs)
 
 lgr_obs_rel_forDH <- obs_rel_grps10 %>% 
@@ -99,7 +99,7 @@ lgr_dh_tab3$cell_count <- c("n.00","n.10","n.01","n.11")[match(lgr_dh_tab3$DH_la
 mcn_loc_considered <- c("MCN","BON","Estuary")
 
 mcn_obs_rel_forDH <- obs_rel_grps10 %>% 
-  filter(dat_grp %in% c("mcn_det") & prim_loc_cat %in% mcn_loc_considered) %>% 
+  filter(dat_grp %in% c("mcn_det","mcn_pooled") & prim_loc_cat %in% mcn_loc_considered) %>% 
   mutate(loc_consid=prim_loc_cat)
 
 table(mcn_obs_rel_forDH$prim_loc_cat)
@@ -128,7 +128,24 @@ mcn_dh_tab3 <- mcn_dh_tab2 %>%
 
 mcn_dh_tab3$cell_count <- c("n.00","n.10","n.01","n.11")[match(mcn_dh_tab3$DH_label,c("MCN","MCN -> BON","MCN -> Estuary","MCN -> BON -> Estuary"))]
 
+gc()
 
-saveRDS(mcn_dh_tab3,"comp_files/mcn_dh_tab.rds")
-saveRDS(lgr_dh_tab3,"comp_files/lgr_dh_tab.rds")
+saveRDS(mcn_dh_tab3,"comp_files/mcn_dh_tab_wMCNPOOL.rds")
+saveRDS(lgr_dh_tab3,"comp_files/lgr_dh_tab_wMCNPOOL.rds")
+
+
+####################################################################################### #
+# Adding a column that identifies tags that were included in the estimation process
+####################################################################################### #
+
+
+tagDF_rel_grps <- readRDS("comp_files/tags_and_obs_comb_ls9825.rds")$"tags_comb"  
+tagDF_rel_grps$tagid_inclu <- tagDF_rel_grps$tagid %in% unique(obs_rel_grps10$tagid)
+tagDF_rel_grps$tagid_inclu_LGR <- tagDF_rel_grps$tagid %in% unique((obs_rel_grps10 %>% filter(dat_grp=="lgr_pooled"))$tagid)
+tagDF_rel_grps$tagid_inclu_MCN <- tagDF_rel_grps$tagid %in% unique((obs_rel_grps10 %>% filter(dat_grp=="mcn_pooled"))$tagid)
+tagDF_rel_grps$tagid_inclu_LGRdet <- tagDF_rel_grps$tagid %in% unique((obs_rel_grps10 %>% filter(dat_grp=="lgr_det"))$tagid)
+tagDF_rel_grps$tagid_inclu_MCNdet <- tagDF_rel_grps$tagid %in% unique((obs_rel_grps10 %>% filter(dat_grp=="mcn_det"))$tagid)
+
+
+saveRDS(tagDF_rel_grps,"comp_files/tags_comb_inclu_9825_wMCNPOOL.rds")
 

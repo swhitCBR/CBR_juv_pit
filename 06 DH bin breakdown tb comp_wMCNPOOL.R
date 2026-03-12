@@ -1,6 +1,6 @@
 library(dplyr)
 
-lgr_dh_tab_l <- readRDS("comp_files/lgr_dh_tab.rds")
+lgr_dh_tab_l <- readRDS("comp_files/lgr_dh_tab_wMCNPOOL.rds")
 
 lgr_dh_tab_year <- lgr_dh_tab_l %>% 
   arrange(dat_grp,esutype,reartype,defin_det_yr,cell_count) %>%
@@ -64,13 +64,13 @@ lgr_bin_brkDF <- bind_rows(
   mutate(n.11=ifelse(is.na(n.11),0,n.11),
          n.11greq10=n.11>=10)
 
-saveRDS(lgr_bin_brkDF,"comp_files/lgr_bin_brkDF.rds")
+saveRDS(lgr_bin_brkDF,"comp_files/lgr_bin_brkDF_wMCNPOOL.rds")
 
 
 
 library(dplyr)
 
-mcn_dh_tab_l <- readRDS("comp_files/mcn_dh_tab.rds")
+mcn_dh_tab_l <- readRDS("comp_files/mcn_dh_tab_wMCNPOOL.rds")
 
 mcn_dh_tab_year <- mcn_dh_tab_l %>% 
   arrange(dat_grp,esutype,reartype,defin_det_yr,cell_count) %>%
@@ -134,4 +134,4 @@ mcn_bin_brkDF <- bind_rows(
   mutate(n.11=ifelse(is.na(n.11),0,n.11),
          n.11greq10=n.11>=10)
 
-saveRDS(mcn_bin_brkDF,"comp_files/mcn_bin_brkDF.rds")
+saveRDS(mcn_bin_brkDF,"comp_files/mcn_bin_brkDF_wMCNPOOL.rds")

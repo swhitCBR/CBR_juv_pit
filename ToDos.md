@@ -18,14 +18,6 @@
 - Release year vs. Migration year
 	- including transports
 
-
-
-
-
-
-
-
-
 ### Writing
 - [ ] Find explicit references and quotations to confirm claims in Introduction 
 	- [[Claims to bolster from introduction]]

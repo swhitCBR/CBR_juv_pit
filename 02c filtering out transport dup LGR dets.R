@@ -129,12 +129,11 @@ subb_tb1$min_estMigry <- sapply(1:nrow(subb_tb1),function(ii) {
 tags_comb_raw <- tags_comb_raw %>% left_join(subb_tb1 %>% select(tagid,min_estMigry),by="tagid")
 head(tags_comb_raw %>% filter(!is.na(min_estMigry)))
 
+tags_and_obs_comb_raw_ls <- list("tags_comb_raw"=tags_comb_raw,
+                                 "obs_comb_raw"=obs_comb_raw)
 
 
-
-saveRDS(list("tags_comb_raw"=tags_comb_raw,
-             "obs_comb_raw"=obs_comb_raw),
-        "temp/tags_and_obs_comb_raw_ls9825.rds")
+saveRDS(tags_and_obs_comb_raw_ls,"temp/tags_and_obs_comb_raw_ls9825.rds")
 
 
 tags_comb <- tags_comb_raw %>% filter(!excluded & reartype!="U")
